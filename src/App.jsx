@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 import { SavedProvider } from './context/SavedContext';
@@ -17,15 +18,17 @@ import RegisterPage from './pages/RegisterPage';
 import LocalitiesPage from './pages/LocalitiesPage';
 import LocalitiesMapPage from './pages/LocalitiesMapPage';
 import PremiumPage from './pages/PremiumPage';
+import ProductsPage from './pages/ProductsPage';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <SavedProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <SavedProvider>
             <Routes>
               {/* Auth routes — no main layout */}
               <Route path="/login" element={<LoginPage />} />
@@ -126,7 +129,7 @@ export default function App() {
                 path="/localities/map"
                 element={
                   <ProtectedRoute>
-                    <MainLayout hideFooter={true}>
+                    <MainLayout hideFooter={true} hideNavbar={true}>
                       <LocalitiesMapPage />
                     </MainLayout>
                   </ProtectedRoute>
@@ -147,12 +150,25 @@ export default function App() {
                 }
               />
 
+              {/* Home Essentials & Furnishing Showroom */}
+              <Route
+                path="/products"
+                element={
+                  <MainLayout>
+                    <ProductsPage />
+                  </MainLayout>
+                }
+              />
+              <Route path="/essentials" element={<Navigate to="/products" replace />} />
+              <Route path="/home-essentials" element={<Navigate to="/products" replace />} />
+
               {/* Catch-all: redirect to landing page */}
               <Route path="*" element={<MainLayout><HomePage /></MainLayout>} />
             </Routes>
           </SavedProvider>
         </AuthProvider>
       </ToastProvider>
-    </BrowserRouter>
-  );
+    </ThemeProvider>
+  </BrowserRouter>
+);
 }

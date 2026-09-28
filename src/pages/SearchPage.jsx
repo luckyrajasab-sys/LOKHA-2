@@ -350,6 +350,28 @@ export default function SearchPage() {
       <div className="search-page-control-bar">
         <div className="search-container-wide">
           <form onSubmit={handleSearch} className="search-control-bar-inner">
+            {/* Quick Purpose Segmented Switcher */}
+            <div className="search-purpose-segmented-bar" role="tablist" aria-label="Filter by purpose">
+              {[
+                { id: '', label: 'All' },
+                { id: 'sale', label: 'Buy' },
+                { id: 'rent', label: 'Rent' },
+                { id: 'commercial', label: 'Commercial' },
+                { id: 'plots', label: 'Plots' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={filters.purpose === tab.id}
+                  className={`search-purpose-pill ${filters.purpose === tab.id ? 'is-active' : ''}`}
+                  onClick={() => handleFilterChange('purpose', tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
             {/* Search Input Field */}
             <div className="search-bar-input-group">
               <div className="search-bar-field">

@@ -87,6 +87,26 @@ export default function LocalitiesMapPage() {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isLocating, setIsLocating] = useState(false);
   const [sidebarTab, setSidebarTab] = useState('radar'); // 'radar' | 'filters'
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [isLiveTracking, setIsLiveTracking] = useState(false);
+  const gpsWatchIdRef = useRef(null);
+  const userLocationMarkerRef = useRef(null);
+
+  // Sync center and radius if URL query params change
+  useEffect(() => {
+    const latParam = parseFloat(searchParams.get('lat'));
+    const lngParam = parseFloat(searchParams.get('lng'));
+    const radParam = parseInt(searchParams.get('radius'));
+    if (!isNaN(latParam) && !isNaN(lngParam)) {
+      setCenter({ lat: latParam, lng: lngParam });
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.flyTo([latParam, lngParam], 13, { duration: 1.2 });
+      }
+    }
+    if (!isNaN(radParam) && radParam > 0) {
+      setRadiusKm(radParam);
+    }
+  }, [searchParams]);
 
   // Calculate detected properties within the circle radar
   const detectedProperties = useMemo(() => {
@@ -153,7 +173,7 @@ export default function LocalitiesMapPage() {
       });
 
       // Google tile layer
-      const layerConfig = GOOGLE_TILE_LAYERS[activeLayer];
+      const layerConfig = GOOGLE_TILE_LAYERS[activeLayer] || GOOGLE_TILE_LAYERS['google-streets'];
       const tile = L.tileLayer(layerConfig.url, {
         subdomains: layerConfig.subdomains,
         maxZoom: layerConfig.maxZoom,
@@ -171,6 +191,26 @@ export default function LocalitiesMapPage() {
       });
 
       mapInstanceRef.current = map;
+      setIsMapReady(true);
+
+      const resizeTimer = setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 250);
+
+      return () => {
+        clearTimeout(resizeTimer);
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
+          tileLayerRef.current = null;
+          radarCircleLayerRef.current = null;
+          radarRingsLayerRef.current = [];
+          markersLayerRef.current = {};
+          setIsMapReady(false);
+        }
+      };
     }
   }, []);
 
@@ -181,16 +221,16 @@ export default function LocalitiesMapPage() {
     if (tileLayerRef.current) {
       map.removeLayer(tileLayerRef.current);
     }
-    const layerConfig = GOOGLE_TILE_LAYERS[activeLayer];
+    const layerConfig = GOOGLE_TILE_LAYERS[activeLayer] || GOOGLE_TILE_LAYERS['google-streets'];
     const newTile = L.tileLayer(layerConfig.url, {
       subdomains: layerConfig.subdomains,
       maxZoom: layerConfig.maxZoom,
       attribution: layerConfig.attribution
     }).addTo(map);
     tileLayerRef.current = newTile;
-  }, [activeLayer]);
+  }, [activeLayer, isMapReady]);
 
-  // Auto-detect user's live location on initial load
+  // Auto-detect user's live location on initial load if no URL coords
   useEffect(() => {
     if (navigator.geolocation && !searchParams.get('lat')) {
       setIsLocating(true);
@@ -280,7 +320,7 @@ export default function LocalitiesMapPage() {
 
     radarRingsLayerRef.current.push(centerMarker);
 
-  }, [center, radiusKm]);
+  }, [center, radiusKm, isMapReady]);
 
   // Render Detected Property Radar Pins
   useEffect(() => {
@@ -348,7 +388,7 @@ export default function LocalitiesMapPage() {
 
       markersLayerRef.current[p.id] = marker;
     });
-  }, [detectedProperties, selectedProperty]);
+  }, [detectedProperties, selectedProperty, isMapReady]);
 
   // Center on preset locality
   const handleSelectPreset = (preset) => {
@@ -357,27 +397,84 @@ export default function LocalitiesMapPage() {
     setSelectedProperty(null);
   };
 
-  // GPS Locate User
+  // GPS Live Location Tracking
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser');
       return;
     }
+
+    // Toggle off live tracking if already active
+    if (isLiveTracking) {
+      if (gpsWatchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(gpsWatchIdRef.current);
+        gpsWatchIdRef.current = null;
+      }
+      if (userLocationMarkerRef.current && mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(userLocationMarkerRef.current);
+        userLocationMarkerRef.current = null;
+      }
+      setIsLiveTracking(false);
+      return;
+    }
+
     setIsLocating(true);
+    // First, get a quick initial position
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setIsLocating(false);
+        setIsLiveTracking(true);
         const { latitude, longitude } = pos.coords;
         setCenter({ lat: latitude, lng: longitude });
-        mapInstanceRef.current?.flyTo([latitude, longitude], 13, { duration: 1.2 });
+        mapInstanceRef.current?.flyTo([latitude, longitude], 14, { duration: 1.2 });
+
+        // Add a pulsing user location marker
+        if (mapInstanceRef.current) {
+          const userIcon = L.divIcon({
+            className: '',
+            html: `<div style="width:16px;height:16px;background:#2563EB;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 6px rgba(37,99,235,0.25);"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+          });
+          if (userLocationMarkerRef.current) {
+            mapInstanceRef.current.removeLayer(userLocationMarkerRef.current);
+          }
+          userLocationMarkerRef.current = L.marker([latitude, longitude], { icon: userIcon, zIndexOffset: 5000 })
+            .addTo(mapInstanceRef.current)
+            .bindPopup('📍 You are here');
+        }
+
+        // Start continuous watch
+        gpsWatchIdRef.current = navigator.geolocation.watchPosition(
+          (watchPos) => {
+            const { latitude: wLat, longitude: wLng } = watchPos.coords;
+            if (userLocationMarkerRef.current) {
+              userLocationMarkerRef.current.setLatLng([wLat, wLng]);
+            }
+          },
+          (err) => {
+            console.warn('[LOKHA GPS] Watch error:', err);
+          },
+          { enableHighAccuracy: true, maximumAge: 5000 }
+        );
       },
-      () => {
+      (err) => {
         setIsLocating(false);
-        alert('Could not detect location. Using current radar center.');
+        console.warn('[LOKHA GPS] Could not get location:', err);
+        alert('Could not detect location. Please allow location access in your browser.');
       },
-      { timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 8000 }
     );
   };
+
+  // Cleanup GPS watch on unmount
+  useEffect(() => {
+    return () => {
+      if (gpsWatchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(gpsWatchIdRef.current);
+      }
+    };
+  }, []);
 
   // Focus single property from sidebar
   const handleFocusProperty = (p) => {
@@ -428,12 +525,12 @@ export default function LocalitiesMapPage() {
         <div className="radar-top-header-right">
           <button
             type="button"
-            className="btn-radar-tool"
+            className={`btn-radar-tool ${isLiveTracking ? 'is-gps-active' : ''}`}
             onClick={handleDetectLocation}
-            title="Scan around my location"
+            title={isLiveTracking ? 'Stop GPS tracking' : 'Track my live location'}
           >
-            <Navigation size={15} className={isLocating ? 'spin-anim' : ''} />
-            <span className="hide-mobile">My Location</span>
+            <Navigation size={15} className={isLocating ? 'spin-anim' : isLiveTracking ? 'gps-tracking-icon' : ''} />
+            <span className="hide-mobile">{isLiveTracking ? 'Live GPS' : 'My Location'}</span>
           </button>
 
           {/* Google Tile Layer Switcher */}
@@ -459,12 +556,7 @@ export default function LocalitiesMapPage() {
         <div className="radar-map-viewport">
           <div ref={mapContainerRef} className="radar-leaflet-container" />
 
-          {/* Live Scanning Conic Radar Sweep Beam Animation */}
-          {isSweepActive && (
-            <div className="radar-sweep-center-anchor" pointer-events="none">
-              <div className="radar-conic-sweep"></div>
-            </div>
-          )}
+          {/* Live GPS Indicator Overlay */}
 
           {/* Bottom Floating Radar HUD Controls */}
           <div className="radar-hud-bar">
@@ -485,16 +577,6 @@ export default function LocalitiesMapPage() {
                 </button>
               ))}
             </div>
-
-            {/* Radar Sweep Toggle */}
-            <button
-              type="button"
-              className={`hud-sweep-toggle ${isSweepActive ? 'is-active' : ''}`}
-              onClick={() => setIsSweepActive(!isSweepActive)}
-            >
-              <span className="hud-sweep-dot"></span>
-              <span>{isSweepActive ? 'Radar Sweep: ON' : 'Radar Sweep: Paused'}</span>
-            </button>
 
             {/* Crosshair Tip */}
             <div className="hud-instruction-badge">

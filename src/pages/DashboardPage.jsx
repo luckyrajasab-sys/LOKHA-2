@@ -30,7 +30,7 @@ export default function DashboardPage() {
   const { user, userProfile, updateProfileData } = useAuth();
   const { showToast } = useToast();
 
-  const [activeTab, setActiveTab] = useState('database');
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Inquiries state
   const [inquiries, setInquiries] = useState([]);
@@ -116,19 +116,19 @@ export default function DashboardPage() {
             <p style={{ fontSize: '0.88rem', color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
               {greeting}, {user?.name?.split(' ')[0] || 'LOKHA Member'} 👋
             </p>
-            <h1 style={{ fontSize: '2rem', margin: 0, fontFamily: 'var(--font-serif, serif)' }}>
-              Dashboard & Marketplace Control
+            <h1 style={{ fontSize: '2rem', margin: 0, fontFamily: 'var(--font-heading)', color: 'var(--color-text-main)' }}>
+              Dashboard & Control Center
             </h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
-              src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=12355B&color=fff`}
+              src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=4A3024&color=fff`}
               alt={user?.name || 'User'}
               style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-border)' }}
             />
             <div>
-              <div style={{ fontWeight: 700, color: 'var(--color-primary-navy)', fontSize: '0.95rem' }}>
-                {user?.name || 'LOKHA User'}
+              <div style={{ fontWeight: 700, color: 'var(--color-text-main)', fontSize: '0.95rem' }}>
+                {user?.name || 'LOKHA Member'}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span className="badge badge-verified" style={{ fontSize: '0.72rem', padding: '2px 6px' }}>
@@ -146,28 +146,6 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--color-border)', marginBottom: '24px', overflowX: 'auto' }}>
           <button
             type="button"
-            onClick={() => setActiveTab('database')}
-            style={{
-              padding: '12px 18px',
-              fontSize: '0.92rem',
-              fontWeight: 700,
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === 'database' ? '3px solid #00A69C' : '3px solid transparent',
-              color: activeTab === 'database' ? '#12355B' : 'var(--color-text-secondary)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <Database size={16} color={activeTab === 'database' ? '#00A69C' : 'currentColor'} />
-            <span>Marketplace Inventory ({properties.length})</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => setActiveTab('overview')}
             style={{
               padding: '12px 18px',
@@ -175,8 +153,8 @@ export default function DashboardPage() {
               fontWeight: 700,
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'overview' ? '3px solid #00A69C' : '3px solid transparent',
-              color: activeTab === 'overview' ? '#12355B' : 'var(--color-text-secondary)',
+              borderBottom: activeTab === 'overview' ? '3px solid var(--lokha-wood, #C29B38)' : '3px solid transparent',
+              color: activeTab === 'overview' ? 'var(--color-text-main)' : 'var(--color-text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -184,8 +162,8 @@ export default function DashboardPage() {
               whiteSpace: 'nowrap'
             }}
           >
-            <Home size={16} color={activeTab === 'overview' ? '#00A69C' : 'currentColor'} />
-            <span>My Activity & Saved ({savedIds.length})</span>
+            <Home size={16} color={activeTab === 'overview' ? 'var(--lokha-wood, #C29B38)' : 'currentColor'} />
+            <span>Overview & Activity ({savedIds.length} Saved)</span>
           </button>
 
           <button
@@ -197,8 +175,8 @@ export default function DashboardPage() {
               fontWeight: 700,
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'my-listings' ? '3px solid #00A69C' : '3px solid transparent',
-              color: activeTab === 'my-listings' ? '#12355B' : 'var(--color-text-secondary)',
+              borderBottom: activeTab === 'my-listings' ? '3px solid var(--lokha-wood, #C29B38)' : '3px solid transparent',
+              color: activeTab === 'my-listings' ? 'var(--color-text-main)' : 'var(--color-text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -206,7 +184,7 @@ export default function DashboardPage() {
               whiteSpace: 'nowrap'
             }}
           >
-            <FileText size={16} color={activeTab === 'my-listings' ? '#00A69C' : 'currentColor'} />
+            <FileText size={16} color={activeTab === 'my-listings' ? 'var(--lokha-wood, #C29B38)' : 'currentColor'} />
             <span>My Listed Properties ({myListedProps.length})</span>
           </button>
 
@@ -219,8 +197,8 @@ export default function DashboardPage() {
               fontWeight: 700,
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'inquiries' ? '3px solid #00A69C' : '3px solid transparent',
-              color: activeTab === 'inquiries' ? '#12355B' : 'var(--color-text-secondary)',
+              borderBottom: activeTab === 'inquiries' ? '3px solid var(--lokha-wood, #C29B38)' : '3px solid transparent',
+              color: activeTab === 'inquiries' ? 'var(--color-text-main)' : 'var(--color-text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -228,8 +206,30 @@ export default function DashboardPage() {
               whiteSpace: 'nowrap'
             }}
           >
-            <MessageSquare size={16} color={activeTab === 'inquiries' ? '#00A69C' : 'currentColor'} />
+            <MessageSquare size={16} color={activeTab === 'inquiries' ? 'var(--lokha-wood, #C29B38)' : 'currentColor'} />
             <span>Inquiries & Leads</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('database')}
+            style={{
+              padding: '12px 18px',
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'database' ? '3px solid var(--lokha-wood, #C29B38)' : '3px solid transparent',
+              color: activeTab === 'database' ? 'var(--color-text-main)' : 'var(--color-text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <Database size={16} color={activeTab === 'database' ? 'var(--lokha-wood, #C29B38)' : 'currentColor'} />
+            <span>Marketplace Inventory ({properties.length})</span>
           </button>
 
           <button
@@ -241,8 +241,8 @@ export default function DashboardPage() {
               fontWeight: 700,
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'profile' ? '3px solid #00A69C' : '3px solid transparent',
-              color: activeTab === 'profile' ? '#12355B' : 'var(--color-text-secondary)',
+              borderBottom: activeTab === 'profile' ? '3px solid var(--lokha-wood, #C29B38)' : '3px solid transparent',
+              color: activeTab === 'profile' ? 'var(--color-text-main)' : 'var(--color-text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -250,7 +250,7 @@ export default function DashboardPage() {
               whiteSpace: 'nowrap'
             }}
           >
-            <User size={16} color={activeTab === 'profile' ? '#00A69C' : 'currentColor'} />
+            <User size={16} color={activeTab === 'profile' ? 'var(--lokha-wood, #C29B38)' : 'currentColor'} />
             <span>Profile & Account</span>
           </button>
         </div>

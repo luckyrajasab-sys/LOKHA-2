@@ -66,8 +66,10 @@ export function DockItem({
 
   // Default base size when cursor is far away
   const baseSize = 44;
+  const fallbackMouseX = useMotionValue(Infinity);
+  const targetMouseX = mouseX || fallbackMouseX;
 
-  const distanceCalc = useTransform(mouseX || useMotionValue(Infinity), (val) => {
+  const distanceCalc = useTransform(targetMouseX, (val) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
     return val - bounds.x - bounds.width / 2;
   });

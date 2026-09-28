@@ -6,7 +6,7 @@ import Footer from '../components/common/Footer';
 import { AuthModal } from '../components/auth/AuthModal';
 import { useAuth } from '../context/AuthContext';
 
-export default function MainLayout({ children, hideFooter = false }) {
+export default function MainLayout({ children, hideFooter = false, hideNavbar = false }) {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -52,8 +52,8 @@ export default function MainLayout({ children, hideFooter = false }) {
 
   return (
     <>
-      <Navbar />
-      <main className="main-content">
+      {!hideNavbar && <Navbar />}
+      <main className={`main-content ${hideNavbar ? 'main-content-fullscreen' : ''}`}>
         {children}
       </main>
       {!hideFooter && <Footer />}

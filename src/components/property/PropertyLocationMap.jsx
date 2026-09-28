@@ -13,6 +13,7 @@ export default function PropertyLocationMap({
   const mapInstanceRef = useRef(null);
   const [isApproximate, setIsApproximate] = useState(true);
 
+  // Initialize Leaflet Map once
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -32,12 +33,29 @@ export default function PropertyLocationMap({
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
       mapInstanceRef.current = map;
+
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 200);
     }
 
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update Layers & Center when props change
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
     const map = mapInstanceRef.current;
     map.setView([lat, lng], 14);
 
-    // Clear previous layers
+    // Clear previous markers & circles
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.Circle) {
         map.removeLayer(layer);

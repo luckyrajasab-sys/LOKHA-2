@@ -26,6 +26,8 @@ import {
 } from 'lucide-react';
 import Logo from './Logo';
 
+import ThemeToggle from './ThemeToggle';
+
 export default function MobileNavDrawer({ 
   isOpen, 
   onClose, 
@@ -57,14 +59,17 @@ export default function MobileNavDrawer({
             <Logo showTagline={false} />
             <p className="mobile-drawer-motto">Discover spaces worth living in.</p>
           </div>
-          <button 
-            type="button" 
-            className="mobile-drawer-close-btn"
-            onClick={onClose}
-            aria-label="Close navigation menu"
-          >
-            <X size={20} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ThemeToggle size={16} />
+            <button 
+              type="button" 
+              className="mobile-drawer-close-btn"
+              onClick={onClose}
+              aria-label="Close navigation menu"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Drawer Content */}
@@ -83,23 +88,31 @@ export default function MobileNavDrawer({
 
           {/* Section 1: Property Portfolio */}
           <div className="mobile-drawer-section">
-            <span className="mobile-drawer-section-title">Property</span>
+            <span className="mobile-drawer-section-title">Property Marketplace</span>
             <div className="mobile-drawer-nav-list">
+              <NavLink 
+                to="/" 
+                className={({ isActive }) => `mobile-drawer-link ${isActive ? 'active' : ''}`}
+                onClick={onClose}
+              >
+                <Home size={17} className="drawer-icon" />
+                <span>Home</span>
+              </NavLink>
               <NavLink 
                 to="/search?purpose=sale" 
                 className={({ isActive }) => `mobile-drawer-link ${isActive ? 'active' : ''}`}
                 onClick={onClose}
               >
-                <Home size={17} className="drawer-icon" />
-                <span>Buy</span>
+                <Building size={17} className="drawer-icon" />
+                <span>Buy Homes</span>
               </NavLink>
               <NavLink 
                 to="/search?purpose=rent" 
                 className={({ isActive }) => `mobile-drawer-link ${isActive ? 'active' : ''}`}
                 onClick={onClose}
               >
-                <Building size={17} className="drawer-icon" />
-                <span>Rent</span>
+                <Building2 size={17} className="drawer-icon" />
+                <span>Rentals</span>
               </NavLink>
               <NavLink 
                 to="/sell" 
@@ -107,7 +120,7 @@ export default function MobileNavDrawer({
                 onClick={onClose}
               >
                 <PlusCircle size={17} className="drawer-icon" />
-                <span>Sell</span>
+                <span>Sell Property</span>
               </NavLink>
               <NavLink 
                 to="/search?status=Under+Construction" 
@@ -115,22 +128,22 @@ export default function MobileNavDrawer({
                 onClick={onClose}
               >
                 <Sparkles size={17} className="drawer-icon" />
-                <span>New Projects</span>
+                <span>New Projects & Townships</span>
               </NavLink>
               <NavLink 
                 to="/search?purpose=commercial" 
                 className={({ isActive }) => `mobile-drawer-link ${isActive ? 'active' : ''}`}
                 onClick={onClose}
               >
-                <Building2 size={17} className="drawer-icon" />
-                <span>Commercial</span>
+                <Briefcase size={17} className="drawer-icon" />
+                <span>Commercial & Tech Parks</span>
               </NavLink>
             </div>
           </div>
 
-          {/* Section 1b: Discover & Design */}
+          {/* Section 1b: Discover, Living & Partners */}
           <div className="mobile-drawer-section">
-            <span className="mobile-drawer-section-title">Discover & Design</span>
+            <span className="mobile-drawer-section-title">Discovery & Lifestyle</span>
             <div className="mobile-drawer-nav-list">
               <NavLink 
                 to="/localities" 
@@ -138,15 +151,31 @@ export default function MobileNavDrawer({
                 onClick={onClose}
               >
                 <MapPin size={17} className="drawer-icon" />
-                <span>Localities</span>
+                <span>Localities & Radar</span>
               </NavLink>
               <NavLink 
-                to="/about" 
+                to="/products" 
                 className={({ isActive }) => `mobile-drawer-link ${isActive ? 'active' : ''}`}
                 onClick={onClose}
               >
-                <Sparkles size={17} className="drawer-icon" />
-                <span>Interiors & Architecture</span>
+                <ShoppingBag size={17} className="drawer-icon" />
+                <span>Home Essentials & Showroom</span>
+              </NavLink>
+              <NavLink 
+                to="/about#agents" 
+                className={({ isActive }) => `mobile-drawer-link ${isActive ? 'active' : ''}`}
+                onClick={onClose}
+              >
+                <ShieldCheck size={17} className="drawer-icon" />
+                <span>Verified Agents & Brokers</span>
+              </NavLink>
+              <NavLink 
+                to="/about#builders" 
+                className={({ isActive }) => `mobile-drawer-link ${isActive ? 'active' : ''}`}
+                onClick={onClose}
+              >
+                <Building size={17} className="drawer-icon" />
+                <span>Builders & Developers</span>
               </NavLink>
               <NavLink 
                 to="/premium" 
@@ -154,7 +183,7 @@ export default function MobileNavDrawer({
                 onClick={onClose}
               >
                 <Crown size={17} className="drawer-icon" style={{ color: '#D4AF37' }} />
-                <span>Premium & Credits</span>
+                <span>Premium Concierge & Credits</span>
               </NavLink>
             </div>
           </div>

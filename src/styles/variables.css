@@ -159,3 +159,91 @@
   --header-height: 68px;
   --bottom-nav-height: 64px;
 }
+
+/* ==========================================================================
+   LOKHA Dark Mode Design Tokens — Deep Luxury Architectural Theme
+   ========================================================================== */
+[data-theme="dark"] {
+  /* ── Primary Neutrals & Surfaces ── */
+  --lokha-bg: #141311;                /* Deep Warm Obsidian */
+  --lokha-surface: #1E1C19;           /* Refined Dark Walnut Charcoal */
+  --lokha-surface-warm: #26231F;      /* Soft Elevated Dark Cream */
+  --lokha-beige: #2E2923;             /* Dark Sand Border */
+  --lokha-border: #3A342D;            /* Subtle Muted Border */
+
+  /* ── Primary Colors ── */
+  --lokha-primary: #FAF6F0;           /* Soft Warm Ivory */
+  --lokha-primary-dark: #FFFFFF;      /* Pure Crisp White */
+  --lokha-primary-charcoal: #EFE8E0;  /* Warm Light Sand */
+
+  /* ── Wood & Gold Accents in Dark Mode ── */
+  --lokha-wood: #D4AF7A;              /* Radiant Warm Amber Wood */
+  --lokha-wood-light: #E2C799;        /* Illuminated Oak */
+  --lokha-wood-dark: #8A6346;         /* Grounded Timber */
+  --lokha-walnut-deep: #B8956A;       /* Amber Walnut */
+  --lokha-ivory: #1E1C19;
+  --lokha-brass: #D4AF7A;
+
+  /* ── Wooden Interior Button System in Dark Mode ── */
+  --wood-walnut-deep: #B8956A;
+  --wood-walnut-dark: #9E7D55;
+  --wood-walnut-hover: #D4AF7A;
+  --wood-natural: #C5A070;
+  --wood-oak-warm: #E2C799;
+  --wood-ivory: #1A1815;
+  --wood-brass: #E2C799;
+  --wood-brass-light: #F0DCB8;
+  --wood-disabled-bg: #2A2621;
+  --wood-disabled-text: #6B6258;
+  --wood-disabled-border: #38322B;
+
+  /* ── Typography Colors ── */
+  --color-text-main: #FAF6F0;
+  --color-text-secondary: #B5A89B;
+  --color-text-muted: #85786C;
+  --color-text-inverse: #141311;
+
+  /* ── Global Theme Mappings ── */
+  --color-primary-navy: #FAF6F0;
+  --color-navy-dark: #FFFFFF;
+  --color-navy-light: #D4AF7A;
+  --color-navy-tint: #26231F;
+
+  --color-trust-blue: #60A5FA;
+  --color-blue-hover: #93C5FD;
+  --color-blue-tint: #1E293B;
+
+  --color-cta-teal: #B8956A;
+  --color-cta-teal-hover: #D4AF7A;
+  --color-cta-teal-active: #9E7D55;
+  --color-teal-tint: #2A251E;
+  --color-teal-tint-subtle: #201C17;
+
+  /* Neutrals & Surfaces */
+  --color-bg-page: var(--lokha-bg);
+  --color-card: var(--lokha-surface);
+  --color-card-subtle: var(--lokha-surface-warm);
+  --color-border: var(--lokha-beige);
+  --color-border-subtle: #2A251E;
+  --color-border-focus: var(--lokha-wood);
+
+  /* Semantic Feedback */
+  --color-verified-bg: rgba(0, 149, 246, 0.16);
+  --color-verified-text: #60A5FA;
+  --color-verified-border: rgba(96, 165, 250, 0.35);
+
+  --color-warning-light: rgba(212, 175, 122, 0.14);
+  --color-warning-text: #E2C799;
+
+  --color-error-light: rgba(182, 111, 82, 0.18);
+  --color-error-text: #F87171;
+
+  /* Shadows (Deep Dark Ambient Depth) */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 12px 30px -4px rgba(0, 0, 0, 0.8);
+  --shadow-xl: 0 22px 44px -6px rgba(0, 0, 0, 0.9);
+  --shadow-card-hover: 0 14px 32px -4px rgba(0, 0, 0, 0.85), 0 0 18px rgba(212, 175, 122, 0.09);
+}
+

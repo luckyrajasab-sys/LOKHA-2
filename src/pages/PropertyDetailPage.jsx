@@ -4,7 +4,7 @@ import {
   ArrowLeft, Heart, Share2, MapPin, BedDouble, Bath,
   Maximize, Car, CheckCircle2, ShieldCheck, AlertTriangle,
   IndianRupee, Phone, Calendar, ChevronDown, ChevronUp,
-  Star, Building2
+  Star, Building2, Map
 } from 'lucide-react';
 import { useSaved } from '../context/SavedContext';
 import { useAuth } from '../context/AuthContext';
@@ -105,7 +105,7 @@ export default function PropertyDetailPage() {
               onClick={() => toggleSave(property.id)}
               aria-label={saved ? 'Remove from saved' : 'Save property'}
               title={saved ? 'Remove from saved' : 'Save'}
-              style={{ border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', padding: '6px 12px', borderRadius: 'var(--radius-md)', background: '#fff', fontSize: '0.84rem', fontWeight: 600, color: saved ? 'var(--color-saved-heart)' : 'var(--color-text-secondary)' }}
+              style={{ border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '6px', width: 'auto', padding: '6px 12px', borderRadius: 'var(--radius-md)', background: 'var(--color-card, #fff)', fontSize: '0.84rem', fontWeight: 600, color: saved ? 'var(--color-saved-heart)' : 'var(--color-text-secondary)' }}
             >
               <Heart size={16} fill={saved ? 'var(--color-saved-heart)' : 'none'} />
               {saved ? 'Saved' : 'Save'}
@@ -133,8 +133,8 @@ export default function PropertyDetailPage() {
                 padding: '12px 16px',
                 fontSize: '0.88rem',
                 fontWeight: 600,
-                borderBottom: `3px solid ${activeSection === sec.id ? 'var(--color-trust-blue)' : 'transparent'}`,
-                color: activeSection === sec.id ? 'var(--color-primary-navy)' : 'var(--color-text-secondary)',
+                borderBottom: `3px solid ${activeSection === sec.id ? 'var(--lokha-wood, var(--color-trust-blue))' : 'transparent'}`,
+                color: activeSection === sec.id ? 'var(--color-text-main, var(--color-primary-navy))' : 'var(--color-text-secondary)',
                 whiteSpace: 'nowrap',
                 background: 'none',
                 transition: 'all 0.15s'
@@ -156,18 +156,18 @@ export default function PropertyDetailPage() {
                 <StatusBadge status={property.possessionStatus} />
                 {property.featured && <span className="badge badge-featured">Featured</span>}
               </div>
-              <h1 style={{ fontSize: 'clamp(1.4rem, 2.5vw, 2rem)', color: 'var(--color-primary-navy)', marginBottom: '8px', lineHeight: 1.25 }}>
+              <h1 style={{ fontSize: 'clamp(1.4rem, 2.5vw, 2rem)', color: 'var(--color-text-main, var(--color-primary-navy))', marginBottom: '8px', lineHeight: 1.25 }}>
                 {property.title}
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-text-secondary)', fontSize: '0.95rem' }}>
-                <MapPin size={16} color="var(--color-trust-blue)" />
+                <MapPin size={16} color="var(--lokha-wood, var(--color-trust-blue))" />
                 <span>{property.locality}, {property.city}, {property.state}</span>
               </div>
             </div>
 
             {/* Price Row */}
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-heading)', color: 'var(--color-primary-navy)' }}>
+              <span style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-heading)', color: 'var(--color-text-main, var(--color-primary-navy))' }}>
                 {formatIndianPrice(property.price, property.purpose)}
               </span>
               {emiText && (
@@ -273,10 +273,37 @@ export default function PropertyDetailPage() {
                 locality={property.locality}
                 city={property.city}
               />
+              {/* View on Radar Map Link */}
+              <div style={{ marginTop: '16px' }}>
+                <a
+                  href={`/localities/map?lat=${currentLat}&lng=${currentLng}&radius=5`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.86rem',
+                    fontWeight: 600,
+                    color: 'var(--lokha-accent, #8A6346)',
+                    textDecoration: 'none',
+                    padding: '8px 14px',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--color-bg-page)',
+                    transition: 'all 150ms ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--lokha-accent, #8A6346)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+                >
+                  <Map size={15} />
+                  View on Property Radar
+                </a>
+              </div>
               {property.nearby && property.nearby.length > 0 && (
                 <div style={{ marginTop: '24px' }}>
                   <h4 style={{ fontSize: '0.95rem', color: 'var(--color-primary-navy)', marginBottom: '12px' }}>
-                    Key Landmarks & Transit
+                    Key Landmarks &amp; Transit
                   </h4>
                   <NearbyPlaces places={property.nearby} />
                 </div>
@@ -379,16 +406,6 @@ export default function PropertyDetailPage() {
                 >
                   <Calendar size={16} /> Schedule Visit
                 </button>
-                {property.agent?.phone && (
-                  <a
-                    href={`tel:${property.agent.phone}`}
-                    className="btn btn-outline"
-                    id="call-owner-btn"
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}
-                  >
-                    <Phone size={15} /> Call {property.agent.phone}
-                  </a>
-                )}
               </div>
 
               {/* Safety Notice */}
@@ -410,7 +427,7 @@ export default function PropertyDetailPage() {
         bottom: '64px',
         left: 0,
         right: 0,
-        background: '#FFFFFF',
+        background: 'var(--color-card, #FFFFFF)',
         borderTop: '1px solid var(--color-border)',
         padding: '10px 16px',
         gap: '10px',

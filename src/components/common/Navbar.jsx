@@ -14,6 +14,7 @@ import ContactLokhaModal from './ContactLokhaModal';
 import MoreMenu from './MoreMenu';
 import PropertyMenu from './PropertyMenu';
 import HeaderSearch from './HeaderSearch';
+import ThemeToggle from './ThemeToggle';
 import { useSaved } from '../../context/SavedContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -105,21 +106,28 @@ export default function Navbar() {
 
           {/* ── Center: Primary Architectural Desktop Navigation ── */}
           <nav className="lokha-desktop-nav" aria-label="Main Navigation">
+            <NavLink 
+              to="/" 
+              className={({ isActive }) => `lokha-nav-link ${isActive && location.pathname === '/' ? 'active' : ''}`}
+            >
+              Home
+            </NavLink>
+
             {/* ── Property ▾ Dropdown Trigger ── */}
             <div className="property-menu-wrapper">
               <button
                 ref={propertyMenuTriggerRef}
                 type="button"
                 className={`property-menu-trigger ${isPropertyMenuOpen ? 'is-open' : ''} ${isPropertyActive ? 'is-active' : ''}`}
-                onClick={isAuthenticated ? togglePropertyMenu : () => navigate('/login')}
+                onClick={togglePropertyMenu}
                 aria-expanded={isPropertyMenuOpen}
                 aria-haspopup="menu"
                 aria-label="Property options: Buy, Rent, Sell, New Projects, Commercial"
                 id="property-menu-btn"
               >
-                <span>Property</span>
+                <span>Properties</span>
                 <ChevronDown
-                  size={15}
+                  size={14}
                   className={`property-menu-trigger-chevron ${isPropertyMenuOpen ? 'is-open' : ''}`}
                   aria-hidden="true"
                 />
@@ -133,22 +141,34 @@ export default function Navbar() {
             </div>
 
             <NavLink 
+              to="/search?purpose=sale" 
+              className={({ isActive }) => `lokha-nav-link ${isActive && searchParams.get('purpose') === 'sale' ? 'active' : ''}`}
+            >
+              Buy
+            </NavLink>
+            <NavLink 
+              to="/search?purpose=rent" 
+              className={({ isActive }) => `lokha-nav-link ${isActive && searchParams.get('purpose') === 'rent' ? 'active' : ''}`}
+            >
+              Rent
+            </NavLink>
+            <NavLink 
               to={isAuthenticated ? "/localities" : "/login"} 
               className={({ isActive }) => `lokha-nav-link ${isActive ? 'active' : ''}`}
             >
               Localities
             </NavLink>
             <NavLink 
+              to="/products" 
+              className={({ isActive }) => `lokha-nav-link ${isActive ? 'active' : ''}`}
+            >
+              Essentials
+            </NavLink>
+            <NavLink 
               to={isAuthenticated ? "/about" : "/login"} 
               className={({ isActive }) => `lokha-nav-link ${isActive ? 'active' : ''}`}
             >
-              Interiors
-            </NavLink>
-            <NavLink 
-              to="/premium" 
-              className={({ isActive }) => `lokha-nav-link ${isActive ? 'active' : ''}`}
-            >
-              Premium
+              About
             </NavLink>
 
             {/* ── More ▾ mega-menu trigger ── */}
@@ -157,7 +177,7 @@ export default function Navbar() {
                 ref={moreMenuTriggerRef}
                 type="button"
                 className={`more-menu-trigger ${isMoreMenuOpen ? 'is-open' : ''}`}
-                onClick={isAuthenticated ? toggleMoreMenu : () => navigate('/login')}
+                onClick={toggleMoreMenu}
                 aria-expanded={isMoreMenuOpen}
                 aria-haspopup="dialog"
                 aria-label="More navigation options"
@@ -165,7 +185,7 @@ export default function Navbar() {
               >
                 More
                 <ChevronDown
-                  size={15}
+                  size={14}
                   className={`more-menu-trigger-chevron ${isMoreMenuOpen ? 'is-open' : ''}`}
                   aria-hidden="true"
                 />
@@ -175,16 +195,15 @@ export default function Navbar() {
                 isOpen={isMoreMenuOpen}
                 onClose={closeMoreMenu}
                 triggerRef={moreMenuTriggerRef}
+                onOpenContact={() => setIsContactOpen(true)}
               />
             </div>
           </nav>
 
-          {/* ── Topbar Search Bar: Present on Landing Page ONLY ── */}
-          {isHomepage && (
-            <HeaderSearch className="header-search-landing-only" />
-          )}
           {/* ── Right: Header Actions Cluster ── */}
           <div className="lokha-header-actions">
+            {/* Theme Toggle (Light / Dark Mode) */}
+            <ThemeToggle size={16} />
 
             {/* Saved Homes Button */}
             <Link 

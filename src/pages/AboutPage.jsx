@@ -443,6 +443,141 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* ── 5B. THE LOKHA ECOSYSTEM: BUYERS, OWNERS, AGENTS & BUILDERS ─ */}
+      <section className="about-ecosystem-section" style={{ padding: '80px 0', background: 'var(--color-bg-page, #F7F5F0)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', maxWidth: '720px', margin: '0 auto 52px' }}>
+            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--lokha-wood, #8B5A2B)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '8px' }}>
+              Stakeholder Empowerment
+            </span>
+            <h2 style={{ fontSize: 'clamp(2rem, 3.2vw, 2.6rem)', color: 'var(--color-text-main, #1C1917)', fontWeight: 800, margin: 0, fontFamily: 'var(--font-heading)' }}>
+              Built for every side of Indian Real Estate.
+            </h2>
+            <p style={{ color: 'var(--color-text-secondary, #78716C)', marginTop: '12px', fontSize: '1rem', lineHeight: 1.6 }}>
+              Whether you are discovering your dream home, monetizing a portfolio, or marketing a master-planned community, LOKHA provides purpose-built tools.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+            {/* 1. Buyer Experience */}
+            <div id="buyers" style={{ background: 'var(--color-card, #FFFFFF)', borderRadius: 'var(--radius-xl)', padding: '32px 28px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--lokha-surface-warm, #FAF6F0)', color: 'var(--lokha-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                <Home size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-text-main)', marginBottom: '10px' }}>
+                Buyers & Tenants
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '20px', flex: 1 }}>
+                Discover verified properties with direct owner contacts, zero hidden charges, GPS proximity radar, and transparent EMI estimations.
+              </p>
+              <ul style={{ padding: 0, margin: '0 0 24px 0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {[
+                  '100% Zero-brokerage direct options',
+                  'Live Haversine transit & amenity radar',
+                  '1-click instant site-visit bookings',
+                  'Historical price trends & market comparisons'
+                ].map((item, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', color: 'var(--color-text-main)' }}>
+                    <CheckCircle2 size={15} color="var(--lokha-accent, #00A69C)" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/search" className="btn btn-outline" style={{ justifyContent: 'center', fontSize: '0.86rem' }}>
+                Browse Available Homes
+              </Link>
+            </div>
+
+            {/* 2. Owner & Seller Experience */}
+            <div id="owners" style={{ background: 'var(--color-card, #FFFFFF)', borderRadius: 'var(--radius-xl)', padding: '32px 28px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--lokha-surface-warm, #FAF6F0)', color: 'var(--lokha-wood)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                <Key size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-text-main)', marginBottom: '10px' }}>
+                Property Owners & Sellers
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '20px', flex: 1 }}>
+                List your residential or commercial real estate for free. Connect directly with thousands of verified tenants and serious buyers.
+              </p>
+              <ul style={{ padding: 0, margin: '0 0 24px 0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {[
+                  'Free zero-commission property listing',
+                  'Direct buyer inquiry notifications',
+                  'Real-time visit scheduling manager',
+                  'Full listing control and edit flexibility'
+                ].map((item, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', color: 'var(--color-text-main)' }}>
+                    <CheckCircle2 size={15} color="var(--lokha-accent, #00A69C)" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/sell" className="btn btn-cta-teal" style={{ justifyContent: 'center', fontSize: '0.86rem' }}>
+                List Property for Free
+              </Link>
+            </div>
+
+            {/* 3. Agent & Broker Support */}
+            <div id="agents" style={{ background: 'var(--color-card, #FFFFFF)', borderRadius: 'var(--radius-xl)', padding: '32px 28px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--lokha-surface-warm, #FAF6F0)', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                <Compass size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-text-main)', marginBottom: '10px' }}>
+                Agents & Certified Brokers
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '20px', flex: 1 }}>
+                Scale your advisory business. Showcase verified RERA credentials, build micro-market authority, and manage verified buyer inquiries.
+              </p>
+              <ul style={{ padding: 0, margin: '0 0 24px 0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {[
+                  'Verified RERA partner profile badges',
+                  'Locality-focused listing amplification',
+                  'Real-time lead alerts & CRM integration',
+                  'High-intent buyer connection guarantee'
+                ].map((item, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', color: 'var(--color-text-main)' }}>
+                    <CheckCircle2 size={15} color="var(--lokha-accent, #00A69C)" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/search" className="btn btn-outline" style={{ justifyContent: 'center', fontSize: '0.86rem' }}>
+                Explore Partner Listings
+              </Link>
+            </div>
+
+            {/* 4. Builder & Developer Support */}
+            <div id="builders" style={{ background: 'var(--color-card, #FFFFFF)', borderRadius: 'var(--radius-xl)', padding: '32px 28px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--lokha-surface-warm, #FAF6F0)', color: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                <Layers size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--color-text-main)', marginBottom: '10px' }}>
+                Builders & Developers
+              </h3>
+              <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, marginBottom: '20px', flex: 1 }}>
+                Showcase premier townships and master-planned developments. Deliver virtual 3D floor plans and manage project inventory with ease.
+              </p>
+              <ul style={{ padding: 0, margin: '0 0 24px 0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {[
+                  'Township & high-rise master plan showcase',
+                  'Floor plan, specification & brochure uploads',
+                  'Direct institutional buyer inquiry routing',
+                  'Phase-wise possession & inventory updates'
+                ].map((item, i) => (
+                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', color: 'var(--color-text-main)' }}>
+                    <CheckCircle2 size={15} color="var(--lokha-accent, #00A69C)" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/search" className="btn btn-outline" style={{ justifyContent: 'center', fontSize: '0.86rem' }}>
+                View Premier Projects
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── 6. FOUNDER SECTION: ARCHITECTURAL STUDIO ───────────────── */}
       <section className="about-founder-studio">
         <div className="container">
@@ -512,14 +647,14 @@ export default function AboutPage() {
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {[
-                      { name: 'Frontend', status: 'Implemented' },
-                      { name: 'Location Technology', status: 'Implemented' },
-                      { name: 'Authentication UI', status: 'Implemented' },
-                      { name: 'Backend', status: 'In Development' },
-                      { name: 'Firebase', status: 'In Development' },
-                      { name: 'Database', status: 'In Development' },
-                      { name: 'Real-Time Services', status: 'In Development' },
-                      { name: 'AI & Data Science', status: 'In Development' }
+                      { name: 'Frontend React 19', status: 'Implemented' },
+                      { name: 'Location Radar & GPS', status: 'Implemented' },
+                      { name: 'Firebase Authentication', status: 'Connected & Active' },
+                      { name: 'Firebase Realtime DB', status: 'Connected & Active' },
+                      { name: 'Firebase Storage', status: 'Connected & Active' },
+                      { name: 'Inquiries Lead Engine', status: 'Connected & Active' },
+                      { name: 'RERA Verification', status: 'Active' },
+                      { name: 'AI Valuation Model', status: 'In Development' }
                     ].map((t) => (
                       <span
                         key={t.name}
@@ -527,10 +662,10 @@ export default function AboutPage() {
                           fontSize: '0.74rem',
                           padding: '4px 10px',
                           borderRadius: '6px',
-                          background: t.status === 'Implemented' ? 'rgba(0, 166, 156, 0.2)' : 'rgba(255, 255, 255, 0.08)',
-                          color: t.status === 'Implemented' ? '#2DD4BF' : '#CBD5E1',
+                          background: t.status !== 'In Development' ? 'rgba(0, 166, 156, 0.2)' : 'rgba(255, 255, 255, 0.08)',
+                          color: t.status !== 'In Development' ? '#2DD4BF' : '#CBD5E1',
                           fontWeight: 600,
-                          border: `1px solid ${t.status === 'Implemented' ? 'rgba(0, 166, 156, 0.4)' : 'rgba(255, 255, 255, 0.12)'}`
+                          border: `1px solid ${t.status !== 'In Development' ? 'rgba(0, 166, 156, 0.4)' : 'rgba(255, 255, 255, 0.12)'}`
                         }}
                       >
                         {t.name} • {t.status}

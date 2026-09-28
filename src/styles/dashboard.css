@@ -29,7 +29,7 @@
 }
 
 .metric-card {
-  background: #FFFFFF;
+  background: var(--color-card, #FFFFFF);
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
   padding: var(--space-5);
@@ -80,7 +80,7 @@
   font-family: var(--font-heading);
   font-size: 1.65rem;
   font-weight: 800;
-  color: var(--lokha-primary, #2F241F);
+  color: var(--color-text-main, #2F241F);
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
@@ -89,7 +89,7 @@
 .metric-card .metric-label {
   font-family: var(--font-body);
   font-size: 0.85rem;
-  color: var(--lokha-muted, #7A6958);
+  color: var(--color-text-secondary, #7A6958);
   font-weight: 600;
   margin-top: 3px;
 }
@@ -108,7 +108,7 @@
 }
 
 .dashboard-panel {
-  background: #FFFFFF;
+  background: var(--color-card, #FFFFFF);
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
   padding: var(--space-6);
@@ -128,7 +128,7 @@
 .panel-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--color-primary-navy);
+  color: var(--color-text-main, var(--color-primary-navy));
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -152,7 +152,7 @@
 }
 
 .timeline-date-badge {
-  background: #FFFFFF;
+  background: var(--color-card, #FFFFFF);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-2) var(--space-3);

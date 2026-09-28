@@ -1,20 +1,32 @@
 import React, { useState } from 'react';
-import { X, Phone, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import {
+  X, Phone, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle2,
+  Smartphone, Send, ChevronRight
+} from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { sendPropertyInquiry } from '../../services/inquiryService';
 
+const QUICK_MESSAGES = [
+  'I am interested in this property. Please share more details.',
+  'Is the price negotiable? Can we schedule a site visit?',
+  'Can you share the floor plan and RERA registration details?',
+  'When is this ready for possession?'
+];
+
 export default function ContactOwnerModal({ property, onClose }) {
   const { showToast } = useToast();
-  const { user } = useAuth();
+  const { user, openAuthModal } = useAuth();
 
-  const [message, setMessage] = useState('I am interested in this property. Please contact me with more details and arrange a visit.');
-  const [phone, setPhone] = useState(user?.mobile || user?.phone || '+91 98450 12345');
-  const [contactMethod, setContactMethod] = useState('both');
+  const [activeTab, setActiveTab] = useState('call'); // 'call' | 'whatsapp' | 'inquiry'
+  const [message, setMessage] = useState(QUICK_MESSAGES[0]);
+  const [senderPhone, setSenderPhone] = useState(user?.mobile || user?.phone || '');
+  const [senderName, setSenderName] = useState(user?.name || '');
   const [isSent, setIsSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
 
-  const agent = property.agent || {
+  const agent = property?.agent || property?.owner || {
     name: 'Property Representative',
     type: 'Verified Contact',
     phone: '+91 98765 43210',
@@ -22,8 +34,50 @@ export default function ContactOwnerModal({ property, onClose }) {
     photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
   };
 
-  const handleSend = async (e) => {
+  const agentPhone = agent.phone || '+91 98765 43210';
+  const agentPhoneClean = agentPhone.replace(/\s/g, '');
+  const waMessage = encodeURIComponent(
+    `Hi, I'm interested in: ${property?.title || 'your property'} listed on LOKHA Real Estate. ${message}`
+  );
+  const waLink = `https://wa.me/${agentPhoneClean.replace('+', '')}?text=${waMessage}`;
+  const maskedPhone = showPhone
+    ? agentPhone
+    : agentPhone.replace(/(\+?\d{3})\d+(\d{2})/, '$1 ••••• $2');
+
+  const handleRevealPhone = () => {
+    if (!user) {
+      openAuthModal(() => setShowPhone(true));
+    } else {
+      setShowPhone(true);
+    }
+  };
+
+  const handleCall = () => {
+    if (!user) {
+      openAuthModal(() => setShowPhone(true));
+      return;
+    }
+    window.location.href = `tel:${agentPhoneClean}`;
+  };
+
+  const handleWhatsApp = () => {
+    if (!user) {
+      openAuthModal(() => window.open(waLink, '_blank'));
+      return;
+    }
+    window.open(waLink, '_blank');
+  };
+
+  const handleInquiry = async (e) => {
     e.preventDefault();
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+    if (!senderPhone.trim() || senderPhone.length < 7) {
+      showToast('Please enter a valid contact number.', 'error');
+      return;
+    }
     setSending(true);
     try {
       await sendPropertyInquiry({
@@ -31,18 +85,16 @@ export default function ContactOwnerModal({ property, onClose }) {
         propertyTitle: property.title,
         propertyOwnerUid: property.ownerUid || property.createdBy || null,
         senderUid: user?.uid || null,
-        senderName: user?.name || 'Prospective Buyer',
+        senderName: senderName.trim() || user?.name || 'Prospective Buyer',
         senderEmail: user?.email || '',
-        senderPhone: phone,
+        senderPhone: senderPhone.trim(),
         message
       });
       setIsSent(true);
       showToast(`Inquiry sent to ${agent.name}!`, 'success');
-      setTimeout(() => {
-        onClose();
-      }, 1800);
+      setTimeout(() => onClose(), 2200);
     } catch (err) {
-      console.error('Error sending inquiry:', err);
+      console.error('[LOKHA ContactModal] Inquiry error:', err);
       showToast('Failed to deliver inquiry. Please try again.', 'error');
     } finally {
       setSending(false);
@@ -50,122 +102,214 @@ export default function ContactOwnerModal({ property, onClose }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Contact Owner">
+      <div className="modal-content contact-owner-modal" onClick={(e) => e.stopPropagation()}>
+
+        {/* ── Header ── */}
         <div className="modal-header">
           <div>
-            <h3 style={{ fontSize: '1.2rem', color: 'var(--color-primary-navy)' }}>
-              Contact Property Lister
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-              {property.title}
-            </p>
+            <h3 className="modal-title">Contact Property Lister</h3>
+            <p className="modal-subtitle">{property?.title || 'LOKHA Property'}</p>
           </div>
-          <button type="button" onClick={onClose} className="btn btn-ghost btn-sm" aria-label="Close dialog">
+          <button type="button" onClick={onClose} className="btn btn-ghost btn-sm modal-close-btn" aria-label="Close">
             <X size={20} />
           </button>
         </div>
 
-        {isSent ? (
-          <div style={{ padding: '40px 24px', textAlign: 'center' }}>
-            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#DCFCE7', color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
-              <CheckCircle2 size={36} />
+        {/* ── Agent Mini Card ── */}
+        <div className="agent-mini-card">
+          <img src={agent.photo} alt={agent.name} className="agent-avatar" onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(agent.name) + '&background=8A6346&color=fff'; }} />
+          <div className="agent-mini-info">
+            <div className="agent-mini-name-row">
+              <span className="agent-name">{agent.name}</span>
+              <span className="badge badge-verified"><ShieldCheck size={10} /> Verified</span>
             </div>
-            <h4 style={{ color: 'var(--color-primary-navy)', fontSize: '1.25rem', marginBottom: '8px' }}>
-              Message Delivered!
-            </h4>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-              {agent.name} will reach out to you shortly via Phone and WhatsApp at {phone}.
-            </p>
+            <div className="agent-role">{agent.type}</div>
+            <div className="agent-response-time">⚡ {agent.responseTime}</div>
           </div>
-        ) : (
-          <form onSubmit={handleSend}>
-            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {/* Agent / Owner Mini Card */}
-              <div className="agent-card" style={{ paddingBottom: '12px' }}>
-                <img src={agent.photo} alt={agent.name} className="agent-avatar" />
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span className="agent-name">{agent.name}</span>
-                    <span className="badge badge-verified" style={{ padding: '2px 6px', fontSize: '0.7rem' }}>
-                      <ShieldCheck size={11} /> Verified
-                    </span>
-                  </div>
-                  <div className="agent-role">{agent.type}</div>
-                  <div style={{ fontSize: '0.76rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                    ⚡ {agent.responseTime}
-                  </div>
-                </div>
-              </div>
+        </div>
 
-              {/* Quick Preset Messages */}
-              <div>
-                <label className="form-label" style={{ marginBottom: '6px' }}>Quick Message</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-                  {[
-                    'Is the price negotiable?',
-                    'Can you share the floor plan?',
-                    'When is this ready for possession?'
-                  ].map((quick) => (
+        {/* ── Tab Switcher ── */}
+        <div className="contact-tab-bar">
+          <button
+            type="button"
+            className={`contact-tab ${activeTab === 'call' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('call')}
+          >
+            <Phone size={14} /> Call
+          </button>
+          <button
+            type="button"
+            className={`contact-tab ${activeTab === 'whatsapp' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('whatsapp')}
+          >
+            <Smartphone size={14} /> WhatsApp
+          </button>
+          <button
+            type="button"
+            className={`contact-tab ${activeTab === 'inquiry' ? 'is-active' : ''}`}
+            onClick={() => setActiveTab('inquiry')}
+          >
+            <MessageSquare size={14} /> Inquiry
+          </button>
+        </div>
+
+        {/* ── Tab Panels ── */}
+        <div className="contact-tab-body">
+
+          {/* CALL TAB */}
+          {activeTab === 'call' && (
+            <div className="contact-action-panel">
+              <div className="phone-reveal-box">
+                <div className="phone-reveal-label">Owner / Agent Phone</div>
+                <div className="phone-reveal-number">{maskedPhone}</div>
+                {!showPhone && (
+                  <button type="button" className="btn-reveal-phone" onClick={handleRevealPhone}>
+                    Reveal Number <ChevronRight size={14} />
+                  </button>
+                )}
+              </div>
+              <button type="button" className="btn-contact-action btn-call" onClick={handleCall}>
+                <Phone size={18} />
+                {user ? `Call ${agent.name.split(' ')[0]}` : 'Login to Call'}
+              </button>
+              <p className="contact-action-note">
+                A direct phone call to the listed owner or verified partner agent.
+              </p>
+            </div>
+          )}
+
+          {/* WHATSAPP TAB */}
+          {activeTab === 'whatsapp' && (
+            <div className="contact-action-panel">
+              <div className="quick-message-box">
+                <div className="quick-msg-label">Your Message</div>
+                <div className="quick-msg-chips">
+                  {QUICK_MESSAGES.map((q) => (
                     <button
-                      key={quick}
+                      key={q}
                       type="button"
-                      onClick={() => setMessage(quick)}
-                      style={{
-                        fontSize: '0.76rem',
-                        padding: '4px 8px',
-                        background: 'var(--color-bg-page)',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-sm)',
-                        color: 'var(--color-text-main)'
-                      }}
+                      className={`quick-msg-chip ${message === q ? 'is-selected' : ''}`}
+                      onClick={() => setMessage(q)}
                     >
-                      {quick}
+                      {q}
                     </button>
                   ))}
                 </div>
-                <textarea
-                  className="form-textarea"
-                  rows={3}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  required
-                />
               </div>
-
-              {/* Contact phone number */}
-              <div className="form-field" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="contact-phone">Your Contact Number</label>
-                <input 
-                  id="contact-phone"
-                  type="tel"
-                  className="form-input"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+91 98450 00000"
-                  required
-                />
-              </div>
-
-              {/* Mandatory Safety Notice */}
-              <div className="safety-notice">
-                <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span>
-                  <strong>Safety Notice:</strong> Never transfer token money or pay advance fees before inspecting the physical property, verifying ownership title documents, and signing a formal agreement.
-                </span>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button type="button" onClick={onClose} className="btn btn-outline">
-                Cancel
+              <button type="button" className="btn-contact-action btn-whatsapp" onClick={handleWhatsApp}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.099 1.508 5.823L.057 23.2a.75.75 0 0 0 .926.926l5.377-1.451A11.93 11.93 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.649-.525-5.156-1.435l-.369-.223-3.833 1.034 1.034-3.833-.223-.369A9.975 9.975 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+                {user ? 'Open WhatsApp' : 'Login to WhatsApp'}
               </button>
-              {/* Primary Conversion CTA - TEAL */}
-              <button type="submit" className="btn btn-cta-teal">
-                Contact Owner
-              </button>
+              <p className="contact-action-note">
+                Sends a pre-written message to the agent's WhatsApp. Opens in WhatsApp app or web.
+              </p>
             </div>
-          </form>
+          )}
+
+          {/* INQUIRY TAB */}
+          {activeTab === 'inquiry' && (
+            isSent ? (
+              <div className="inquiry-success-state">
+                <div className="inquiry-success-icon">
+                  <CheckCircle2 size={40} />
+                </div>
+                <h4>Inquiry Delivered!</h4>
+                <p>{agent.name} will contact you at <strong>{senderPhone}</strong> shortly.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleInquiry}>
+                <div className="inquiry-form-body">
+                  {/* Quick message chips */}
+                  <div>
+                    <label className="form-label">Your Message</label>
+                    <div className="quick-msg-chips" style={{ marginBottom: '8px' }}>
+                      {QUICK_MESSAGES.slice(0, 3).map((q) => (
+                        <button
+                          key={q}
+                          type="button"
+                          className={`quick-msg-chip ${message === q ? 'is-selected' : ''}`}
+                          onClick={() => setMessage(q)}
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      className="form-textarea"
+                      rows={3}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Type your message..."
+                      required
+                    />
+                  </div>
+
+                  {/* Name */}
+                  {!user && (
+                    <div className="form-field" style={{ marginBottom: 0 }}>
+                      <label className="form-label" htmlFor="inq-name">Your Name</label>
+                      <input
+                        id="inq-name"
+                        type="text"
+                        className="form-input"
+                        value={senderName}
+                        onChange={(e) => setSenderName(e.target.value)}
+                        placeholder="Full Name"
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {/* Phone */}
+                  <div className="form-field" style={{ marginBottom: 0 }}>
+                    <label className="form-label" htmlFor="inq-phone">Your Contact Number</label>
+                    <input
+                      id="inq-phone"
+                      type="tel"
+                      className="form-input"
+                      value={senderPhone}
+                      onChange={(e) => setSenderPhone(e.target.value)}
+                      placeholder="+91 98450 00000"
+                      required
+                    />
+                  </div>
+
+                  {/* Safety Notice */}
+                  <div className="safety-notice">
+                    <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
+                    <span>
+                      <strong>Safety:</strong> Never transfer token money before inspecting the property, verifying ownership documents, and signing a formal agreement.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="modal-footer">
+                  <button type="button" onClick={onClose} className="btn btn-outline">Cancel</button>
+                  <button type="submit" className="btn btn-cta-teal" disabled={sending}>
+                    {sending ? (
+                      <>
+                        <span className="spin-anim" style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%' }} />
+                        Sending…
+                      </>
+                    ) : (
+                      <><Send size={14} /> Send Inquiry</>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )
+          )}
+        </div>
+
+        {/* Safety footer for Call / WhatsApp tabs */}
+        {activeTab !== 'inquiry' && (
+          <div className="safety-notice" style={{ margin: '0 0 8px 0' }}>
+            <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '1px' }} />
+            <span>
+              <strong>Safety:</strong> Never pay advance fees before verifying property ownership and signing a formal agreement.
+            </span>
+          </div>
         )}
       </div>
     </div>

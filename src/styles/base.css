@@ -132,6 +132,12 @@ ul, ol {
   padding-bottom: var(--space-10);
 }
 
+.main-content-fullscreen {
+  padding-bottom: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
 /* Custom warm architectural scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
