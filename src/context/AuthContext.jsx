@@ -47,6 +47,7 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       try {
         if (fbUser) {
+          console.log('[LOKHA Auth] User is signed in:', fbUser.uid, fbUser.email);
           // Immediately set active user state from Firebase Auth token (instant UI response)
           setUser(formatUser(fbUser, null));
           setLoading(false);
@@ -65,6 +66,7 @@ export function AuthProvider({ children }) {
             console.warn('[LOKHA AuthContext] Background profile sync warning:', pErr);
           }
         } else {
+          console.log('[LOKHA Auth] No user is signed in.');
           setUser(null);
           setUserProfile(null);
           setLoading(false);
