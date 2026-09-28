@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { getFromStorage, saveToStorage, KEYS } from '../utils/storage';
 import { useToast } from './ToastContext';
+import { useAuth } from './AuthContext';
 import {
   subscribeToProperties,
   addProperty,
@@ -10,6 +11,11 @@ import {
   seedPropertiesDatabase,
   getDatabaseStats
 } from '../services/firebaseService';
+import {
+  subscribeToUserSavedProperties,
+  saveUserProperty,
+  removeUserProperty
+} from '../services/savedPropertyService';
 
 const SavedContext = createContext(null);
 
@@ -38,6 +44,7 @@ const DEFAULT_VISITS = [
 
 export function SavedProvider({ children }) {
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   // Real-time properties from Firebase
   const [properties, setProperties] = useState([]);
@@ -86,18 +93,38 @@ export function SavedProvider({ children }) {
     saveToStorage(KEYS.SCHEDULED_VISITS, scheduledVisits);
   }, [scheduledVisits]);
 
+  // Subscribe to user saved properties from Firebase when logged in
+  useEffect(() => {
+    if (!user?.uid) return;
+    const unsubscribe = subscribeToUserSavedProperties(user.uid, (remoteIds) => {
+      if (Array.isArray(remoteIds) && remoteIds.length > 0) {
+        setSavedIds(remoteIds);
+      }
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
+  }, [user?.uid]);
+
   const toggleSave = useCallback((propertyId) => {
     setSavedIds((prev) => {
       const isSaved = prev.includes(propertyId);
       if (isSaved) {
         showToast('Removed from Saved Homes', 'info');
+        if (user?.uid) {
+          removeUserProperty(user.uid, propertyId).catch((err) => console.warn('Remove error:', err));
+        }
         return prev.filter((id) => id !== propertyId);
       } else {
         showToast('Added to Saved Homes', 'heart');
+        if (user?.uid) {
+          saveUserProperty(user.uid, propertyId).catch((err) => console.warn('Save error:', err));
+        }
         return [...prev, propertyId];
       }
     });
-  }, [showToast]);
+  }, [showToast, user?.uid]);
 
   const isSaved = useCallback((propertyId) => savedIds.includes(propertyId), [savedIds]);
 

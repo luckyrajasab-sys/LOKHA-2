@@ -213,6 +213,9 @@ export default function SellPage() {
     addCustomProperty({
       id: newId,
       title,
+      ownerUid: user?.uid || null,
+      createdBy: user?.uid || null,
+      creatorEmail: user?.email || null,
       type: formData.propertyType,
       propertyType: formData.propertyType,
       listingType: formData.purpose,

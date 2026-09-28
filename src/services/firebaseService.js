@@ -118,6 +118,9 @@ export function formatPropertyDoc(input) {
 
   return {
     id: input.id || `lokha-custom-${Date.now()}`,
+    ownerUid: input.ownerUid || input.createdBy || null,
+    createdBy: input.createdBy || input.ownerUid || null,
+    creatorEmail: input.creatorEmail || null,
     title: input.title || `${bhk ? bhk + ' BHK ' : ''}${propertyType} in ${locality}`,
     type: propertyType,
     propertyType: propertyType,

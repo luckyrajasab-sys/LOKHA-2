@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Heart, Calendar, MessageSquare, Home, Eye, TrendingUp,
-  Search, Bell, Bookmark, Building2, Database, ShieldCheck, Plus
+  Search, Bell, Bookmark, Building2, Database, ShieldCheck, Plus,
+  User, Phone, Mail, CheckCircle2, AlertCircle, FileText, Send
 } from 'lucide-react';
 import { useSaved } from '../context/SavedContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { formatIndianPrice } from '../utils/formatters';
 import EmptyState from '../components/common/EmptyState';
 import PropertyManagerPanel from '../components/admin/PropertyManagerPanel';
+import { getUserInquiries, getOwnerInquiries, updateInquiryStatus } from '../services/inquiryService';
 
 const RECENT_SEARCHES = [
   { q: '3 BHK in Whitefield, Bengaluru', count: '1,248 homes', time: '2 hours ago' },
@@ -22,15 +25,87 @@ const PRICE_ALERTS = [
 ];
 
 export default function DashboardPage() {
+  const location = useLocation();
   const { savedIds, scheduledVisits, properties, dbStats } = useSaved();
-  const { user, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState('database'); // Default to database tab so user can immediately see and verify the seeded data!
+  const { user, userProfile, updateProfileData } = useAuth();
+  const { showToast } = useToast();
+
+  const [activeTab, setActiveTab] = useState('database');
+
+  // Inquiries state
+  const [inquiries, setInquiries] = useState([]);
+  const [loadingInquiries, setLoadingInquiries] = useState(false);
+
+  // Profile form state
+  const [profileName, setProfileName] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+
+  // Listen to URL ?tab= parameter
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam) {
+      if (tabParam === 'listings') setActiveTab('my-listings');
+      else if (tabParam === 'messages' || tabParam === 'leads') setActiveTab('inquiries');
+      else if (tabParam === 'settings') setActiveTab('profile');
+      else if (tabParam === 'alerts' || tabParam === 'visits') setActiveTab('overview');
+      else setActiveTab(tabParam);
+    }
+  }, [location.search]);
+
+  // Sync profile form when userProfile changes
+  useEffect(() => {
+    if (user) {
+      setProfileName(user.name || user.displayName || '');
+      setProfilePhone(user.phone || user.mobile || '');
+    }
+  }, [user]);
+
+  // Load inquiries when on inquiries tab
+  useEffect(() => {
+    if (activeTab === 'inquiries' && user?.uid) {
+      setLoadingInquiries(true);
+      Promise.all([
+        getUserInquiries(user.uid),
+        getOwnerInquiries(user.uid)
+      ])
+        .then(([sent, received]) => {
+          // Merge unique by inquiryId
+          const map = new Map();
+          [...sent, ...received].forEach((inq) => map.set(inq.inquiryId, inq));
+          setInquiries(Array.from(map.values()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)));
+        })
+        .catch((err) => console.warn('Error loading inquiries:', err))
+        .finally(() => setLoadingInquiries(false));
+    }
+  }, [activeTab, user?.uid]);
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    try {
+      await updateProfileData({
+        fullName: profileName.trim(),
+        phone: profilePhone.trim()
+      });
+      showToast('Profile updated successfully!', 'success');
+    } catch (err) {
+      showToast(err.message || 'Failed to update profile', 'error');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   const savedProps = properties.filter((p) => savedIds.includes(p.id));
+  const myListedProps = properties.filter(
+    (p) => user?.uid && (p.ownerUid === user.uid || p.createdBy === user.uid)
+  );
 
   const now = new Date();
   const hour = now.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const roleDisplay = (user?.role || 'buyer').toUpperCase();
 
   return (
     <div className="dashboard-wrapper">
@@ -41,67 +116,142 @@ export default function DashboardPage() {
             <p style={{ fontSize: '0.88rem', color: 'var(--color-text-secondary)', marginBottom: '4px' }}>
               {greeting}, {user?.name?.split(' ')[0] || 'LOKHA Member'} 👋
             </p>
-            <h1 style={{ fontSize: '2rem', margin: 0, fontFamily: 'var(--font-serif)' }}>Dashboard & Marketplace Control</h1>
+            <h1 style={{ fontSize: '2rem', margin: 0, fontFamily: 'var(--font-serif, serif)' }}>
+              Dashboard & Marketplace Control
+            </h1>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <img
-              src={user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'}
+              src={user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=12355B&color=fff`}
               alt={user?.name || 'User'}
               style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-border)' }}
             />
             <div>
               <div style={{ fontWeight: 700, color: 'var(--color-primary-navy)', fontSize: '0.95rem' }}>
-                {user?.name || 'LOKHA Administrator'}
+                {user?.name || 'LOKHA User'}
               </div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>
-                {user?.role || 'Marketplace Manager'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="badge badge-verified" style={{ fontSize: '0.72rem', padding: '2px 6px' }}>
+                  <ShieldCheck size={11} /> {roleDisplay}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                  {user?.email}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--color-border)', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--color-border)', marginBottom: '24px', overflowX: 'auto' }}>
           <button
             type="button"
             onClick={() => setActiveTab('database')}
             style={{
-              padding: '12px 20px',
-              fontSize: '0.95rem',
+              padding: '12px 18px',
+              fontSize: '0.92rem',
               fontWeight: 700,
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'database' ? '3px solid #B8956A' : '3px solid transparent',
-              color: activeTab === 'database' ? '#1E1B18' : 'var(--color-text-secondary)',
+              borderBottom: activeTab === 'database' ? '3px solid #00A69C' : '3px solid transparent',
+              color: activeTab === 'database' ? '#12355B' : 'var(--color-text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              whiteSpace: 'nowrap'
             }}
           >
-            <Database size={17} color={activeTab === 'database' ? '#B8956A' : 'currentColor'} />
-            <span>Database & Property Listings ({properties.length})</span>
+            <Database size={16} color={activeTab === 'database' ? '#00A69C' : 'currentColor'} />
+            <span>Marketplace Inventory ({properties.length})</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
             style={{
-              padding: '12px 20px',
-              fontSize: '0.95rem',
+              padding: '12px 18px',
+              fontSize: '0.92rem',
               fontWeight: 700,
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'overview' ? '3px solid #B8956A' : '3px solid transparent',
-              color: activeTab === 'overview' ? '#1E1B18' : 'var(--color-text-secondary)',
+              borderBottom: activeTab === 'overview' ? '3px solid #00A69C' : '3px solid transparent',
+              color: activeTab === 'overview' ? '#12355B' : 'var(--color-text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              whiteSpace: 'nowrap'
             }}
           >
-            <Home size={17} color={activeTab === 'overview' ? '#B8956A' : 'currentColor'} />
-            <span>My User Activity & Saved</span>
+            <Home size={16} color={activeTab === 'overview' ? '#00A69C' : 'currentColor'} />
+            <span>My Activity & Saved ({savedIds.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('my-listings')}
+            style={{
+              padding: '12px 18px',
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'my-listings' ? '3px solid #00A69C' : '3px solid transparent',
+              color: activeTab === 'my-listings' ? '#12355B' : 'var(--color-text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <FileText size={16} color={activeTab === 'my-listings' ? '#00A69C' : 'currentColor'} />
+            <span>My Listed Properties ({myListedProps.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('inquiries')}
+            style={{
+              padding: '12px 18px',
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'inquiries' ? '3px solid #00A69C' : '3px solid transparent',
+              color: activeTab === 'inquiries' ? '#12355B' : 'var(--color-text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <MessageSquare size={16} color={activeTab === 'inquiries' ? '#00A69C' : 'currentColor'} />
+            <span>Inquiries & Leads</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('profile')}
+            style={{
+              padding: '12px 18px',
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'profile' ? '3px solid #00A69C' : '3px solid transparent',
+              color: activeTab === 'profile' ? '#12355B' : 'var(--color-text-secondary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <User size={16} color={activeTab === 'profile' ? '#00A69C' : 'currentColor'} />
+            <span>Profile & Account</span>
           </button>
         </div>
 
@@ -113,20 +263,6 @@ export default function DashboardPage() {
         {/* ── TAB 2: USER OVERVIEW & SAVED HOMES ────────────────── */}
         {activeTab === 'overview' && (
           <>
-            {!isAuthenticated && (
-              <div style={{ padding: '16px 20px', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '12px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                <div>
-                  <strong style={{ color: '#92400E', fontSize: '0.92rem' }}>You are viewing in preview mode.</strong>
-                  <p style={{ margin: '2px 0 0', fontSize: '0.82rem', color: '#B45309' }}>
-                    Sign in to sync your personal saved homes and scheduled site visits across devices.
-                  </p>
-                </div>
-                <Link to="/login" className="btn btn-sm" style={{ background: '#B8956A', color: '#1E1B18', fontWeight: 700, textDecoration: 'none', padding: '8px 18px', borderRadius: '8px' }}>
-                  Sign In Now
-                </Link>
-              </div>
-            )}
-
             {/* Metric Cards */}
             <div className="metrics-grid">
               <Link to="/saved" style={{ textDecoration: 'none' }}>
@@ -152,46 +288,46 @@ export default function DashboardPage() {
               </div>
 
               <div className="metric-card">
-                <div className="metric-icon-wrap metric-icon-blue">
-                  <MessageSquare size={24} />
+                <div className="metric-icon-wrap metric-icon-gold">
+                  <Eye size={24} />
                 </div>
                 <div>
-                  <div className="metric-val">4</div>
-                  <div className="metric-label">Active Inquiries</div>
+                  <div className="metric-val">12</div>
+                  <div className="metric-label">Properties Viewed</div>
                 </div>
               </div>
 
               <div className="metric-card">
-                <div className="metric-icon-wrap" style={{ background: 'rgba(184, 149, 106, 0.15)', color: '#B8956A' }}>
-                  <Database size={24} />
+                <div className="metric-icon-wrap metric-icon-teal">
+                  <Building2 size={24} />
                 </div>
                 <div>
-                  <div className="metric-val">{properties.length}</div>
-                  <div className="metric-label">Live Listings in DB</div>
+                  <div className="metric-val">{myListedProps.length}</div>
+                  <div className="metric-label">My Listings</div>
                 </div>
               </div>
             </div>
 
-            {/* Two column layout */}
+            {/* Main content grid */}
             <div className="dashboard-grid">
               <div>
                 {/* Scheduled Site Visits */}
                 <div className="dashboard-panel">
                   <div className="panel-title-bar">
-                    <span className="panel-title"><Calendar size={18} color="var(--color-primary-navy)" /> Scheduled Site Visits</span>
-                    <span className="badge badge-featured">{scheduledVisits.length} active</span>
+                    <span className="panel-title"><Calendar size={18} color="var(--color-trust-blue)" /> Scheduled Site Visits</span>
+                    <span className="panel-count">{scheduledVisits.length}</span>
                   </div>
 
                   {scheduledVisits.length === 0 ? (
                     <EmptyState
                       icon={Calendar}
                       title="No site visits scheduled"
-                      description="Schedule a physical tour or video walkthrough on any property details page."
-                      actionText="Browse Homes"
-                      actionLink="/search"
+                      description="Schedule free verified site visits directly from any property page."
+                      actionText="Explore Properties"
+                      onAction={() => window.location.href = '/search'}
                     />
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       {scheduledVisits.map((vis) => (
                         <div key={vis.id} className="visit-card">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
@@ -216,14 +352,15 @@ export default function DashboardPage() {
                 <div className="dashboard-panel">
                   <div className="panel-title-bar">
                     <span className="panel-title"><TrendingUp size={18} color="var(--color-cta-teal)" /> Profile Trust Score</span>
-                    <span style={{ fontSize: '0.82rem', color: 'var(--color-trust-blue)', fontWeight: 700 }}>85% Complete</span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--color-trust-blue)', fontWeight: 700 }}>
+                      {user?.emailVerified ? '100% Verified' : '85% Verified'}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {[
-                      { label: 'Mobile Number Verified', current: 1, max: 1, barClass: 'bar-blue' },
-                      { label: 'Government Photo ID', current: 1, max: 1, barClass: 'bar-blue' },
-                      { label: 'EB Bill Property Document', current: 1, max: 1, barClass: 'bar-teal' },
-                      { label: 'Buyer Preference Questionnaire', current: 0, max: 1, barClass: 'bar-gray' },
+                      { label: 'Firebase Account Authentication', current: 1, max: 1, barClass: 'bar-blue' },
+                      { label: 'Mobile Number on Profile', current: user?.mobile ? 1 : 0, max: 1, barClass: 'bar-blue' },
+                      { label: 'Role Registered as ' + roleDisplay, current: 1, max: 1, barClass: 'bar-teal' },
                     ].map((item) => (
                       <div key={item.label} className="chart-bar-group">
                         <div className="chart-bar-label">
@@ -235,9 +372,6 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     ))}
-                  </div>
-                  <div style={{ marginTop: '16px', padding: '12px 14px', background: 'var(--color-teal-tint)', borderRadius: 'var(--radius-md)', fontSize: '0.82rem', color: 'var(--color-cta-teal-hover)' }}>
-                    💡 <strong>Tip:</strong> Complete verification to earn the LOKHA Blue Trust Seal for your listings.
                   </div>
                 </div>
               </div>
@@ -274,24 +408,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Price Drop Alerts */}
-                <div className="dashboard-panel">
-                  <div className="panel-title-bar">
-                    <span className="panel-title"><Bell size={18} color="var(--color-saved-heart)" /> Price Drop Alerts</span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {PRICE_ALERTS.map((alert, i) => (
-                      <div key={i} style={{ display: 'flex', gap: '10px', padding: '12px', background: alert.type === 'drop' ? '#FEF2F2' : 'var(--color-navy-tint)', borderRadius: 'var(--radius-md)', border: `1px solid ${alert.type === 'drop' ? '#FECACA' : '#C9DCF0'}` }}>
-                        <div style={{ fontSize: '1.2rem' }}>{alert.type === 'drop' ? '📉' : '🆕'}</div>
-                        <div>
-                          <div style={{ fontWeight: 600, color: 'var(--color-text-main)', fontSize: '0.85rem' }}>{alert.title}</div>
-                          <div style={{ fontSize: '0.78rem', color: alert.type === 'drop' ? 'var(--color-error)' : 'var(--color-primary-navy)', fontWeight: 700, marginTop: '3px' }}>{alert.alert}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Saved homes mini-list */}
                 {savedProps.length > 0 && (
                   <div className="dashboard-panel">
@@ -317,6 +433,206 @@ export default function DashboardPage() {
               </div>
             </div>
           </>
+        )}
+
+        {/* ── TAB 3: MY LISTED PROPERTIES ───────────────────────── */}
+        {activeTab === 'my-listings' && (
+          <div className="dashboard-panel">
+            <div className="panel-title-bar" style={{ marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', margin: '0 0 4px' }}>My Real Estate Listings</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+                  Properties you have published and listed under your Firebase account.
+                </p>
+              </div>
+              <Link to="/sell" className="btn btn-cta-teal" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem' }}>
+                <Plus size={16} /> List New Property
+              </Link>
+            </div>
+
+            {myListedProps.length === 0 ? (
+              <EmptyState
+                icon={Home}
+                title="No properties listed yet"
+                description="List your flat, house, villa, or commercial property with verified ownership documentation."
+                actionText="Post Your Property"
+                onAction={() => window.location.href = '/sell'}
+              />
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                {myListedProps.map((prop) => (
+                  <div key={prop.id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: '#FFFFFF' }}>
+                    <img src={prop.images?.[0]} alt={prop.title} style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                    <div style={{ padding: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span className="badge badge-verified" style={{ fontSize: '0.72rem' }}>{prop.status || 'Available'}</span>
+                        <span style={{ fontSize: '0.78rem', color: 'var(--color-text-secondary)' }}>{prop.propertyType}</span>
+                      </div>
+                      <h4 style={{ fontSize: '1rem', margin: '0 0 6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {prop.title}
+                      </h4>
+                      <div style={{ fontWeight: 700, color: 'var(--color-cta-teal)', fontSize: '1.1rem', marginBottom: '8px' }}>
+                        {formatIndianPrice(prop.price, prop.purpose)}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '14px' }}>
+                        📍 {prop.locality}, {prop.city}
+                      </div>
+                      <Link to={`/property/${prop.id}`} className="btn btn-outline" style={{ width: '100%', display: 'block', textAlign: 'center', fontSize: '0.85rem' }}>
+                        View Marketplace Listing
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── TAB 4: INQUIRIES & LEADS ───────────────────────────── */}
+        {activeTab === 'inquiries' && (
+          <div className="dashboard-panel">
+            <div className="panel-title-bar" style={{ marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', margin: '0 0 4px' }}>Inquiries & Direct Messages</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+                  Realtime inquiries sent and received for properties on LOKHA.
+                </p>
+              </div>
+            </div>
+
+            {loadingInquiries ? (
+              <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>
+                Loading inquiries from Firebase Realtime Database…
+              </div>
+            ) : inquiries.length === 0 ? (
+              <EmptyState
+                icon={MessageSquare}
+                title="No inquiries found"
+                description="When prospective buyers contact you about your properties or you contact a lister, messages appear here in real time."
+                actionText="Explore Properties"
+                onAction={() => window.location.href = '/search'}
+              />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {inquiries.map((inq) => (
+                  <div
+                    key={inq.inquiryId}
+                    style={{
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '18px',
+                      background: inq.senderUid === user?.uid ? '#F8FAFC' : '#FFFFFF'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '8px' }}>
+                      <div>
+                        <span style={{ fontWeight: 700, color: 'var(--color-primary-navy)', fontSize: '1rem' }}>
+                          {inq.propertyTitle}
+                        </span>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
+                          From: <strong>{inq.senderName}</strong> • Phone: <a href={`tel:${inq.senderPhone}`} style={{ color: 'var(--color-cta-teal)' }}>{inq.senderPhone}</a>
+                          {inq.senderEmail && ` • ${inq.senderEmail}`}
+                        </div>
+                      </div>
+                      <span className="badge badge-verified" style={{ textTransform: 'capitalize' }}>
+                        {inq.status || 'new'}
+                      </span>
+                    </div>
+
+                    <div style={{ padding: '12px 14px', background: 'var(--color-bg-page)', borderRadius: '8px', fontSize: '0.88rem', color: 'var(--color-text-main)', marginTop: '8px' }}>
+                      "{inq.message}"
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', fontSize: '0.76rem', color: 'var(--color-text-muted)' }}>
+                      <span>Submitted: {new Date(inq.createdAt || Date.now()).toLocaleString()}</span>
+                      <Link to={`/property/${inq.propertyId}`} style={{ color: 'var(--color-trust-blue)', fontWeight: 600 }}>
+                        View Property →
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── TAB 5: PROFILE & ACCOUNT SETTINGS ─────────────────── */}
+        {activeTab === 'profile' && (
+          <div className="dashboard-panel" style={{ maxWidth: '640px' }}>
+            <h3 style={{ fontSize: '1.25rem', marginBottom: '6px' }}>Profile & Account Details</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+              Manage your verified Firebase user profile information.
+            </p>
+
+            <form onSubmit={handleSaveProfile}>
+              <div className="form-field" style={{ marginBottom: '16px' }}>
+                <label className="form-label">Firebase Account UID</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={user?.uid || ''}
+                  disabled
+                  style={{ background: '#F1F5F9', color: '#64748B', cursor: 'not-allowed' }}
+                />
+              </div>
+
+              <div className="form-field" style={{ marginBottom: '16px' }}>
+                <label className="form-label">Email Address (Immutable Identity)</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  value={user?.email || ''}
+                  disabled
+                  style={{ background: '#F1F5F9', color: '#64748B', cursor: 'not-allowed' }}
+                />
+              </div>
+
+              <div className="form-field" style={{ marginBottom: '16px' }}>
+                <label className="form-label">Assigned Account Role</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={roleDisplay}
+                  disabled
+                  style={{ background: '#F1F5F9', color: '#64748B', cursor: 'not-allowed', fontWeight: 600 }}
+                />
+              </div>
+
+              <div className="form-field" style={{ marginBottom: '16px' }}>
+                <label className="form-label" htmlFor="edit-name">Full Name</label>
+                <input
+                  id="edit-name"
+                  type="text"
+                  className="form-input"
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+
+              <div className="form-field" style={{ marginBottom: '24px' }}>
+                <label className="form-label" htmlFor="edit-phone">Contact Phone Number</label>
+                <input
+                  id="edit-phone"
+                  type="tel"
+                  className="form-input"
+                  value={profilePhone}
+                  onChange={(e) => setProfilePhone(e.target.value)}
+                  placeholder="+91 98450 00000"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="btn btn-cta-teal"
+                disabled={profileSaving}
+                style={{ padding: '12px 24px', fontSize: '0.95rem' }}
+              >
+                {profileSaving ? 'Saving Updates…' : 'Save Changes'}
+              </button>
+            </form>
+          </div>
         )}
       </div>
     </div>

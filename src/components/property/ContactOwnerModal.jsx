@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { X, Phone, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { sendPropertyInquiry } from '../../services/inquiryService';
 
 export default function ContactOwnerModal({ property, onClose }) {
   const { showToast } = useToast();
   const { user } = useAuth();
 
   const [message, setMessage] = useState('I am interested in this property. Please contact me with more details and arrange a visit.');
-  const [phone, setPhone] = useState(user?.mobile || '+91 98450 12345');
+  const [phone, setPhone] = useState(user?.mobile || user?.phone || '+91 98450 12345');
   const [contactMethod, setContactMethod] = useState('both');
   const [isSent, setIsSent] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const agent = property.agent || {
     name: 'Property Representative',
@@ -20,13 +22,31 @@ export default function ContactOwnerModal({ property, onClose }) {
     photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80'
   };
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
-    setIsSent(true);
-    showToast(`Inquiry sent to ${agent.name}!`, 'success');
-    setTimeout(() => {
-      onClose();
-    }, 1800);
+    setSending(true);
+    try {
+      await sendPropertyInquiry({
+        propertyId: property.id,
+        propertyTitle: property.title,
+        propertyOwnerUid: property.ownerUid || property.createdBy || null,
+        senderUid: user?.uid || null,
+        senderName: user?.name || 'Prospective Buyer',
+        senderEmail: user?.email || '',
+        senderPhone: phone,
+        message
+      });
+      setIsSent(true);
+      showToast(`Inquiry sent to ${agent.name}!`, 'success');
+      setTimeout(() => {
+        onClose();
+      }, 1800);
+    } catch (err) {
+      console.error('Error sending inquiry:', err);
+      showToast('Failed to deliver inquiry. Please try again.', 'error');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (

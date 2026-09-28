@@ -60,9 +60,10 @@ export default function UserAccountMenu() {
   }
 
   // If logged in: render the Avatar button with rich account dropdown
-  const displayName = user?.name || 'Vishwa';
-  const displayEmail = user?.email || 'vishwa@lokha.in';
-  const avatarUrl = user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
+  const displayName = user?.name || user?.displayName || 'LOKHA Member';
+  const displayEmail = user?.email || '';
+  const avatarUrl = user?.avatar || user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=12355B&color=fff`;
+  const roleName = (user?.role || 'buyer').toUpperCase();
 
   return (
     <div className="header-account-wrapper" ref={menuRef}>
@@ -86,8 +87,8 @@ export default function UserAccountMenu() {
             <div className="account-dropdown-userinfo">
               <div className="account-user-name-row">
                 <span className="account-user-name">{displayName}</span>
-                <span className="account-verified-pill" title="Verified LOKHA Member">
-                  <ShieldCheck size={11} /> Verified
+                <span className="account-verified-pill" title={`Role: ${roleName}`}>
+                  <ShieldCheck size={11} /> {roleName}
                 </span>
               </div>
               <span className="account-user-email">{displayEmail}</span>

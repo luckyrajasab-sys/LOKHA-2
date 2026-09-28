@@ -23,7 +23,7 @@ export function AuthModal() {
   const { showToast } = useToast();
 
   const [mode, setMode] = useState('login'); // 'login' | 'register' | 'otp'
-  const [authMethod, setAuthMethod] = useState('otp'); // 'otp' | 'password'
+  const [authMethod, setAuthMethod] = useState('password'); // 'password' | 'otp'
 
   // Form states
   const [identifier, setIdentifier] = useState(''); // email or mobile

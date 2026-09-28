@@ -1,163 +1,171 @@
 /**
- * Frontend Mock Authentication Service
- * Architected to mirror Firebase Auth API so it can be swapped seamlessly in the future.
- * DO NOT add Firebase API keys or initialize real Firebase here.
+ * LOKHA Real Firebase Authentication Service
+ * Built with Firebase Modular SDK (v11/v12)
  */
 
-const STORAGE_KEY = 'lokha_auth_user';
+import {
+  auth,
+  googleProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword as fbSignInWithEmail,
+  createUserWithEmailAndPassword as fbCreateUserWithEmail,
+  signOut as fbSignOut,
+  sendPasswordResetEmail as fbSendPasswordResetEmail,
+  updateProfile as fbUpdateProfile
+} from '../firebase/config.js';
+import { createUserProfile, handleGoogleUserProfile, getUserProfile } from './userService.js';
 
-// Mock active sessions in localStorage
-function getStoredUser() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
+/**
+ * Map Firebase Auth error codes into clean, user-friendly messages
+ */
+export function mapAuthError(error) {
+  if (!error) return 'An unexpected error occurred. Please try again.';
+  const code = error.code || '';
 
-function setStoredUser(user) {
-  try {
-    if (user) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  } catch (err) {
-    console.warn('Failed to persist user session', err);
+  switch (code) {
+    case 'auth/email-already-in-use':
+      return 'An account with this email already exists. Please sign in instead.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/weak-password':
+      return 'Please choose a stronger password (at least 6 characters).';
+    case 'auth/user-not-found':
+      return 'No account was found with this email.';
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'Incorrect email or password.';
+    case 'auth/popup-closed-by-user':
+      return 'Google sign-in was cancelled.';
+    case 'auth/popup-blocked':
+      return 'The sign-in popup was blocked by your browser. Please allow popups for this site.';
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your internet connection.';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Access is temporarily disabled; please try again later.';
+    case 'auth/requires-recent-login':
+      return 'Please re-authenticate to perform this action.';
+    case 'auth/user-disabled':
+      return 'This user account has been disabled. Please contact support.';
+    default:
+      return error.message || 'Authentication failed. Please verify your details.';
   }
 }
 
 export const authService = {
   /**
-   * Get current authenticated user
+   * Get current authenticated user directly from Firebase Auth
    */
   getCurrentUser() {
-    return getStoredUser();
+    return auth.currentUser;
   },
 
   /**
-   * Sign in with Google (Simulated OAuth flow)
+   * Official Google Sign-In with automatic profile provisioning
    */
   async signInWithGoogle() {
-    await new Promise((res) => setTimeout(res, 800)); // simulated latency
-    const mockUser = {
-      uid: 'user-google-' + Date.now().toString(36),
-      displayName: 'Aditya Sharma',
-      email: 'aditya.sharma@example.com',
-      photoURL: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      provider: 'google.com',
-      role: 'buyer',
-      phoneNumber: '+91 98765 43210',
-      createdAt: new Date().toISOString()
-    };
-    setStoredUser(mockUser);
-    return mockUser;
-  },
-
-  /**
-   * Sign in with Apple (Simulated OAuth flow)
-   */
-  async signInWithApple() {
-    await new Promise((res) => setTimeout(res, 800));
-    const mockUser = {
-      uid: 'user-apple-' + Date.now().toString(36),
-      displayName: 'Priya Iyer',
-      email: 'priya.iyer@icloud.com',
-      photoURL: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80',
-      provider: 'apple.com',
-      role: 'buyer',
-      phoneNumber: '+91 98111 22334',
-      createdAt: new Date().toISOString()
-    };
-    setStoredUser(mockUser);
-    return mockUser;
-  },
-
-  /**
-   * Request OTP for Email or Mobile
-   */
-  async sendOTP(identifier) {
-    await new Promise((res) => setTimeout(res, 600));
-    // Simulated OTP is always 123456 in dev/preview
-    return {
-      success: true,
-      identifier,
-      message: `A 6-digit verification code has been sent to ${identifier}. (Use code: 123456)`
-    };
-  },
-
-  /**
-   * Verify OTP
-   */
-  async verifyOTP(identifier, code, extraData = {}) {
-    await new Promise((res) => setTimeout(res, 800));
-    if (code !== '123456' && code.length !== 6) {
-      throw new Error('Invalid verification code. Please enter 123456 for preview.');
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const profile = await handleGoogleUserProfile(user);
+      return { user, profile };
+    } catch (err) {
+      console.error('[LOKHA Auth] Google Sign-In Error:', err);
+      throw new Error(mapAuthError(err));
     }
-
-    const isEmail = identifier.includes('@');
-    const mockUser = {
-      uid: 'user-otp-' + Date.now().toString(36),
-      displayName: extraData.name || (isEmail ? identifier.split('@')[0] : 'LOKHA User'),
-      email: isEmail ? identifier : (extraData.email || 'user@lokha.in'),
-      phoneNumber: !isEmail ? identifier : (extraData.phoneNumber || '+91 98765 00000'),
-      photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      provider: isEmail ? 'passwordless-email' : 'phone-otp',
-      role: extraData.role || 'buyer',
-      createdAt: new Date().toISOString()
-    };
-    setStoredUser(mockUser);
-    return mockUser;
   },
 
   /**
    * Standard Email & Password Sign In
    */
   async signInWithEmailAndPassword(email, password) {
-    await new Promise((res) => setTimeout(res, 600));
     if (!email || !password) {
       throw new Error('Please enter both email and password.');
     }
-    const mockUser = {
-      uid: 'user-email-' + Date.now().toString(36),
-      displayName: email.split('@')[0].replace('.', ' '),
-      email,
-      photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      provider: 'password',
-      role: 'buyer',
-      phoneNumber: '+91 99887 76655',
-      createdAt: new Date().toISOString()
-    };
-    setStoredUser(mockUser);
-    return mockUser;
+
+    try {
+      const result = await fbSignInWithEmail(auth, email.trim(), password);
+      const user = result.user;
+      let profile = await getUserProfile(user.uid);
+      if (!profile) {
+        profile = await createUserProfile(user.uid, {
+          name: user.displayName || email.split('@')[0],
+          email: user.email,
+          role: 'buyer'
+        });
+      }
+      return { user, profile };
+    } catch (err) {
+      console.error('[LOKHA Auth] Email Sign-In Error:', err);
+      throw new Error(mapAuthError(err));
+    }
   },
 
   /**
-   * Standard Sign Up
+   * Standard Sign Up with Email, Password & Role
    */
-  async createUserWithEmailAndPassword(name, email, password, role = 'buyer') {
-    await new Promise((res) => setTimeout(res, 700));
-    const mockUser = {
-      uid: 'user-reg-' + Date.now().toString(36),
-      displayName: name || email.split('@')[0],
-      email,
-      photoURL: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-      provider: 'password',
-      role,
-      phoneNumber: '+91 99000 11223',
-      createdAt: new Date().toISOString()
-    };
-    setStoredUser(mockUser);
-    return mockUser;
+  async createUserWithEmailAndPassword({ name, email, password, role = 'buyer', phone = '' }) {
+    if (!name || !email || !password) {
+      throw new Error('Name, email, and password are required.');
+    }
+
+    try {
+      const result = await fbCreateUserWithEmail(auth, email.trim(), password);
+      const user = result.user;
+
+      // Update Firebase Auth display name
+      try {
+        await fbUpdateProfile(user, { displayName: name.trim() });
+      } catch (profileErr) {
+        console.warn('[LOKHA Auth] Error updating display name:', profileErr);
+      }
+
+      // Create rich profile in Realtime Database under /users/{uid}
+      const profile = await createUserProfile(user.uid, {
+        fullName: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        role: role.toLowerCase()
+      });
+
+      return { user, profile };
+    } catch (err) {
+      console.error('[LOKHA Auth] Registration Error:', err);
+      throw new Error(mapAuthError(err));
+    }
   },
 
   /**
-   * Sign out
+   * Send Password Reset Email
+   */
+  async sendPasswordReset(email) {
+    if (!email) {
+      throw new Error('Please enter your email address to reset your password.');
+    }
+
+    try {
+      await fbSendPasswordResetEmail(auth, email.trim());
+      return {
+        success: true,
+        message: 'Password reset link sent! Please check your email inbox.'
+      };
+    } catch (err) {
+      console.error('[LOKHA Auth] Password Reset Error:', err);
+      throw new Error(mapAuthError(err));
+    }
+  },
+
+  /**
+   * Sign Out
    */
   async signOut() {
-    await new Promise((res) => setTimeout(res, 300));
-    setStoredUser(null);
-    return true;
+    try {
+      await fbSignOut(auth);
+      return true;
+    } catch (err) {
+      console.error('[LOKHA Auth] Sign Out Error:', err);
+      throw new Error(mapAuthError(err));
+    }
   }
 };
+
+export default authService;

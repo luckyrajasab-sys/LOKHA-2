@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 import { SavedProvider } from './context/SavedContext';
@@ -132,6 +132,12 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              {/* Aliases for quick navigation */}
+              <Route path="/saved-properties" element={<Navigate to="/saved" replace />} />
+              <Route path="/my-properties" element={<Navigate to="/dashboard?tab=listings" replace />} />
+              <Route path="/inquiries" element={<Navigate to="/dashboard?tab=messages" replace />} />
+              <Route path="/profile" element={<Navigate to="/dashboard?tab=settings" replace />} />
+
               <Route
                 path="/premium"
                 element={
