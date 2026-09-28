@@ -106,6 +106,7 @@ export const authService = {
     try {
       const result = await fbSignInWithEmail(auth, email.trim(), password);
       const user = result.user;
+      console.log('Successfully logged in:', user.email);
       let profile = null;
       try {
         profile = await getUserProfile(user.uid);
