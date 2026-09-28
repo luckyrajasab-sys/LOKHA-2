@@ -1,6 +1,7 @@
 /**
  * LOKHA User Profile & Role Management Service
  * Manages user records in Firebase Realtime Database under /users/{uid}
+ * Built with timeout protection and localStorage resilience so authentication never hangs!
  */
 
 import {
@@ -8,28 +9,56 @@ import {
   ref,
   get,
   set,
-  update,
-  child,
-  serverTimestamp
+  update
 } from '../firebase/config.js';
 
 export const VALID_ROLES = ['buyer', 'owner', 'agent', 'builder'];
 
+function withTimeout(promise, ms = 2000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), ms))
+  ]);
+}
+
+function getCachedProfile(uid) {
+  if (typeof window === 'undefined' || !uid) return null;
+  try {
+    const raw = localStorage.getItem(`lokha_user_profile_${uid}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedProfile(uid, profile) {
+  if (typeof window === 'undefined' || !uid || !profile) return;
+  try {
+    localStorage.setItem(`lokha_user_profile_${uid}`, JSON.stringify(profile));
+  } catch (err) {
+    console.warn('[LOKHA Users] Cache write failed:', err);
+  }
+}
+
 /**
- * Fetch a user profile from /users/{uid}
+ * Fetch a user profile from /users/{uid} with fallback to cached profile
  */
 export async function getUserProfile(uid) {
   if (!uid) return null;
+  const cached = getCachedProfile(uid);
+
   try {
     const userRef = ref(db, `users/${uid}`);
-    const snapshot = await get(userRef);
+    const snapshot = await withTimeout(get(userRef), 2000);
     if (snapshot.exists()) {
-      return snapshot.val();
+      const data = snapshot.val();
+      setCachedProfile(uid, data);
+      return data;
     }
-    return null;
+    return cached;
   } catch (err) {
-    console.warn(`[LOKHA Users] Error reading profile for ${uid}:`, err);
-    return null;
+    console.warn(`[LOKHA Users] RTDB read timed out or failed for ${uid}, using cache/fallback:`, err.message);
+    return cached;
   }
 }
 
@@ -58,8 +87,17 @@ export async function createUserProfile(uid, data) {
     lastLoginAt: Date.now()
   };
 
-  const userRef = ref(db, `users/${uid}`);
-  await set(userRef, profile);
+  // Cache locally first for instant availability
+  setCachedProfile(uid, profile);
+
+  // Sync to Realtime Database in background without blocking
+  try {
+    const userRef = ref(db, `users/${uid}`);
+    await withTimeout(set(userRef, profile), 2500);
+  } catch (err) {
+    console.warn('[LOKHA Users] RTDB write timed out or offline; profile cached locally:', err.message);
+  }
+
   return profile;
 }
 
@@ -71,37 +109,65 @@ export async function createUserProfile(uid, data) {
 export async function handleGoogleUserProfile(firebaseUser) {
   if (!firebaseUser?.uid) return null;
 
-  const userRef = ref(db, `users/${firebaseUser.uid}`);
-  const snapshot = await get(userRef);
+  const cached = getCachedProfile(firebaseUser.uid);
 
-  if (snapshot.exists()) {
-    const existing = snapshot.val();
-    const updates = {
-      lastLoginAt: Date.now(),
-      updatedAt: Date.now(),
-      emailVerified: Boolean(firebaseUser.emailVerified)
-    };
+  try {
+    const userRef = ref(db, `users/${firebaseUser.uid}`);
+    const snapshot = await withTimeout(get(userRef), 2000);
 
-    // Update photo or display name only if not customized or empty
-    if (!existing.fullName && firebaseUser.displayName) {
-      updates.fullName = firebaseUser.displayName;
+    if (snapshot.exists()) {
+      const existing = snapshot.val();
+      const updates = {
+        lastLoginAt: Date.now(),
+        updatedAt: Date.now(),
+        emailVerified: Boolean(firebaseUser.emailVerified)
+      };
+
+      if (!existing.fullName && firebaseUser.displayName) {
+        updates.fullName = firebaseUser.displayName;
+      }
+      if (!existing.photoURL && firebaseUser.photoURL) {
+        updates.photoURL = firebaseUser.photoURL;
+      }
+
+      const merged = { ...existing, ...updates };
+      setCachedProfile(firebaseUser.uid, merged);
+
+      // Async update
+      update(userRef, updates).catch((e) => console.warn('Background update err:', e));
+      return merged;
+    } else {
+      // New Google user registration
+      const newProfile = {
+        uid: firebaseUser.uid,
+        fullName: firebaseUser.displayName || 'LOKHA Member',
+        email: firebaseUser.email || '',
+        phone: firebaseUser.phoneNumber || '',
+        photoURL: firebaseUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(firebaseUser.displayName || 'User')}&background=12355B&color=fff`,
+        provider: 'google.com',
+        role: cached?.role || 'buyer',
+        accountStatus: 'active',
+        emailVerified: Boolean(firebaseUser.emailVerified),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        lastLoginAt: Date.now()
+      };
+
+      setCachedProfile(firebaseUser.uid, newProfile);
+      set(userRef, newProfile).catch((e) => console.warn('Background set err:', e));
+      return newProfile;
     }
-    if (!existing.photoURL && firebaseUser.photoURL) {
-      updates.photoURL = firebaseUser.photoURL;
-    }
+  } catch (err) {
+    console.warn('[LOKHA Users] RTDB unavailable during Google sync, using fast fallback:', err.message);
 
-    await update(userRef, updates);
-    return { ...existing, ...updates };
-  } else {
-    // New Google user registration
-    const newProfile = {
+    const fallback = cached || {
       uid: firebaseUser.uid,
       fullName: firebaseUser.displayName || 'LOKHA Member',
       email: firebaseUser.email || '',
       phone: firebaseUser.phoneNumber || '',
       photoURL: firebaseUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(firebaseUser.displayName || 'User')}&background=12355B&color=fff`,
       provider: 'google.com',
-      role: 'buyer', // Default role for first-time Google sign-ins
+      role: 'buyer',
       accountStatus: 'active',
       emailVerified: Boolean(firebaseUser.emailVerified),
       createdAt: Date.now(),
@@ -109,30 +175,35 @@ export async function handleGoogleUserProfile(firebaseUser) {
       lastLoginAt: Date.now()
     };
 
-    await set(userRef, newProfile);
-    return newProfile;
+    setCachedProfile(firebaseUser.uid, fallback);
+    return fallback;
   }
 }
 
 /**
  * Update user profile fields securely
- * Protected fields like 'uid', 'accountStatus', and 'role' are stripped to prevent unauthorized escalation.
  */
 export async function updateUserProfile(uid, allowedFields) {
   if (!uid) throw new Error('UID is required');
 
+  const cached = getCachedProfile(uid) || {};
   const sanitized = {};
   if (typeof allowedFields.fullName === 'string') sanitized.fullName = allowedFields.fullName.trim();
   if (typeof allowedFields.phone === 'string') sanitized.phone = allowedFields.phone.trim();
   if (typeof allowedFields.photoURL === 'string') sanitized.photoURL = allowedFields.photoURL.trim();
   if (typeof allowedFields.bio === 'string') sanitized.bio = allowedFields.bio.trim();
-  if (typeof allowedFields.companyName === 'string') sanitized.companyName = allowedFields.companyName.trim();
-  if (typeof allowedFields.reraNumber === 'string') sanitized.reraNumber = allowedFields.reraNumber.trim();
   
   sanitized.updatedAt = Date.now();
 
-  const userRef = ref(db, `users/${uid}`);
-  await update(userRef, sanitized);
+  const merged = { ...cached, ...sanitized };
+  setCachedProfile(uid, merged);
 
-  return getUserProfile(uid);
+  try {
+    const userRef = ref(db, `users/${uid}`);
+    await withTimeout(update(userRef, sanitized), 2500);
+  } catch (err) {
+    console.warn('[LOKHA Users] Background profile update warning:', err.message);
+  }
+
+  return merged;
 }

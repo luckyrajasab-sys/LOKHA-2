@@ -47,22 +47,32 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       try {
         if (fbUser) {
-          let profile = await getUserProfile(fbUser.uid);
-          if (!profile) {
-            // Provision profile if missing (e.g. first Google sign-in)
-            profile = await handleGoogleUserProfile(fbUser);
+          // Immediately set active user state from Firebase Auth token (instant UI response)
+          setUser(formatUser(fbUser, null));
+          setLoading(false);
+
+          // Asynchronously enrich with database profile in the background
+          try {
+            let profile = await getUserProfile(fbUser.uid);
+            if (!profile) {
+              profile = await handleGoogleUserProfile(fbUser);
+            }
+            if (profile) {
+              setUserProfile(profile);
+              setUser(formatUser(fbUser, profile));
+            }
+          } catch (pErr) {
+            console.warn('[LOKHA AuthContext] Background profile sync warning:', pErr);
           }
-          setUserProfile(profile);
-          setUser(formatUser(fbUser, profile));
         } else {
           setUser(null);
           setUserProfile(null);
+          setLoading(false);
         }
       } catch (err) {
         console.error('[LOKHA AuthContext] Error resolving auth state:', err);
         setUser(null);
         setUserProfile(null);
-      } finally {
         setLoading(false);
       }
     });
