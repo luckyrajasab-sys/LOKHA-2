@@ -14,9 +14,7 @@
  *         createdAt, updatedAt
  */
 
-import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
-  getDatabase,
   ref,
   onValue,
   set,
@@ -25,44 +23,17 @@ import {
   get,
   child
 } from 'firebase/database';
+import { app as firebaseApp, db as firebaseDb, firebaseConfig } from './firebase.js';
 import { SEED_PROPERTIES } from '../data/seedProperties.js';
 
 const STORAGE_KEY = 'lokha_firebase_properties';
 const SEED_VERSION_KEY = 'lokha_seed_version';
 const CURRENT_SEED_VERSION = '2.2'; // Bumped for 150+ realistic listings
 
-const env = (typeof import.meta !== 'undefined' && import.meta && import.meta.env) ? import.meta.env : {};
-
-// Firebase Configuration from Vite environment
-const firebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY || '',
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || '',
-  databaseURL: env.VITE_FIREBASE_DATABASE_URL || '',
-  projectId: env.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: env.VITE_FIREBASE_APP_ID || ''
-};
-
 const isRealFirebaseConfigured = Boolean(
   firebaseConfig.apiKey &&
   (firebaseConfig.databaseURL || firebaseConfig.projectId)
 );
-
-let firebaseApp = null;
-let firebaseDb = null;
-
-if (isRealFirebaseConfigured) {
-  try {
-    firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    firebaseDb = getDatabase(firebaseApp);
-    console.log('[LOKHA Firebase] Connected to live Firebase Realtime Database.');
-  } catch (err) {
-    console.warn('[LOKHA Firebase] Live connection failed, falling back to local real-time engine:', err);
-    firebaseApp = null;
-    firebaseDb = null;
-  }
-}
 
 // Multi-tab real-time event bus
 let broadcastChannel = null;
