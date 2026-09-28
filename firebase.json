@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "lokha-82898-2e",
     "public": "dist",
     "ignore": [
       "firebase.json",
