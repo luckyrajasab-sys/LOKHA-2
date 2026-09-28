@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+:root {
+  /* ==========================================================================
+     LOKHA Global Design Tokens — Warm Architectural Theme
+     ========================================================================== */
+
+  /* ── Primary Colors ── */
+  --lokha-primary: #2F241F;           /* Deep Walnut */
+  --lokha-primary-dark: #211A17;      /* Dark Espresso */
+  --lokha-primary-charcoal: #332C28;  /* Warm Charcoal */
+
+  /* ── Warm Neutrals ── */
+  --lokha-bg: #F7F3ED;                /* Warm Ivory (Main Page Background) */
+  --lokha-surface: #FFFFFF;           /* Pure White (Cards & Elevated Surfaces) */
+  --lokha-surface-warm: #EFE8DE;      /* Soft Cream (Alternating Sections) */
+  --lokha-beige: #E4D7C7;             /* Warm Beige */
+  --lokha-border: #D6C5B3;            /* Sand Border */
+
+  /* ── Wood Colors ── */
+  --lokha-wood: #8A6346;              /* Natural Wood */
+  --lokha-wood-light: #B8956A;        /* Warm Oak */
+  --lokha-wood-dark: #35231B;         /* Dark Wood */
+  --lokha-walnut-deep: #4A3024;       /* Deep Walnut */
+  --lokha-ivory: #F7F1E7;             /* Ivory */
+  --lokha-brass: #B8955A;             /* Soft Brass Accent */
+
+  /* ── LOKHA Wooden Interior Button System Tokens ── */
+  --wood-walnut-deep: #4A3024;        /* Deep Walnut Base */
+  --wood-walnut-dark: #35231B;        /* Dark Wood / Pressed State */
+  --wood-walnut-hover: #5A3B2D;       /* Natural Warm Walnut Hover */
+  --wood-natural: #8A6346;            /* Natural Wood Borders & Grain */
+  --wood-oak-warm: #B8956A;           /* Warm Oak Accents */
+  --wood-ivory: #F7F1E7;              /* Warm Ivory Text & Secondary Surface */
+  --wood-brass: #B8955A;              /* Soft Brass Micro-Accent */
+  --wood-brass-light: #D4B886;        /* Light Brass Hover Highlight */
+  --wood-terracotta: #9E4733;         /* Warm Terracotta Mahogany */
+  --wood-disabled-bg: #EAE3D8;        /* Muted Taupe/Beige Disabled */
+  --wood-disabled-text: #A89B8C;      /* Low-contrast Walnut Disabled Text */
+  --wood-disabled-border: #DDD4C7;    /* Subtle Disabled Border */
+
+  /* Button System Sizing & Dynamics */
+  --btn-radius: 11px;
+  --btn-height-desktop: 44px;
+  --btn-height-mobile: 48px;
+  --btn-transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  --btn-shadow-primary: 0 4px 14px rgba(53, 35, 27, 0.22), 0 1px 3px rgba(53, 35, 27, 0.16);
+  --btn-shadow-hover: 0 6px 20px rgba(53, 35, 27, 0.32), 0 2px 6px rgba(53, 35, 27, 0.18);
+  --btn-shadow-active: 0 2px 6px rgba(53, 35, 27, 0.24);
+
+  /* ── Refined Architectural Header Palette ── */
+  --header-charcoal: #1C1C1A;
+  --header-warm-black: #11110F;
+  --header-walnut: #5A3E2B;
+  --header-wood: #8A6346;
+  --header-sand: #D8C7AF;
+  --header-soft-beige: #F3EEE6;
+  --header-ivory: #FAF8F3;
+  --header-white: #FFFFFF;
+  --header-stone: #817A70;
+  --header-gold: #B8955A;
+
+  /* ── Accents ── */
+  --lokha-accent: #8A6346;            /* Natural Warm Wood Accent */
+  --lokha-accent-dark: #4A3024;       /* Deep Walnut Accent Hover */
+  --lokha-terracotta: #B66F52;        /* Soft Terracotta */
+  --lokha-gold: #B8955A;              /* Warm Gold */
+  --lokha-muted: #8A7B6D;             /* Warm Taupe Gray */
+  --lokha-placeholder: #9B8C7D;
+
+  /* ── Global Theme Mappings (Used by Existing Components) ── */
+  --color-primary-navy: var(--wood-walnut-deep);
+  --color-navy-dark: var(--wood-walnut-dark);
+  --color-navy-light: var(--wood-natural);
+  --color-navy-tint: var(--lokha-surface-warm);
+
+  --color-trust-blue: var(--wood-natural);
+  --color-blue-hover: var(--wood-walnut-deep);
+  --color-blue-tint: #F3EFEA;
+
+  /* Primary CTA (Wood Material Tokens) */
+  --color-cta-teal: var(--wood-walnut-deep);
+  --color-cta-teal-hover: var(--wood-walnut-hover);
+  --color-cta-teal-active: var(--wood-walnut-dark);
+  --color-teal-tint: #F7F1E7;
+  --color-teal-tint-subtle: #FAF8F5;
+
+  /* Neutrals & Surfaces */
+  --color-bg-page: var(--lokha-bg);
+  --color-card: var(--lokha-surface);
+  --color-card-subtle: var(--lokha-surface-warm);
+  --color-border: var(--lokha-beige);
+  --color-border-subtle: #EDE5D8;
+  --color-border-focus: var(--lokha-accent);
+
+  /* Typography Colors */
+  --color-text-main: var(--lokha-primary-charcoal);
+  --color-text-secondary: var(--lokha-muted);
+  --color-text-muted: #A39587;
+  --color-text-inverse: #F7F3ED;
+
+  /* Semantic Feedback Colors */
+  --color-verified-bg: #E8F0EF;
+  --color-verified-text: var(--lokha-accent-dark);
+  --color-verified-border: #C8DDD9;
+
+  --color-warning: var(--lokha-gold);
+  --color-warning-light: #F7EEDB;
+  --color-warning-text: #785A2B;
+
+  --color-error: var(--lokha-terracotta);
+  --color-error-light: #F7E8E2;
+  --color-error-text: #8C4023;
+
+  --color-saved-heart: var(--lokha-terracotta);
+  --color-saved-heart-bg: #F7E8E2;
+
+  /* Typography */
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Radius (8px system) */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+
+  /* Spacing Scale (8px system) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Shadows (Warm & Architectural) */
+  --shadow-xs: 0 1px 2px rgba(47, 36, 31, 0.04);
+  --shadow-sm: 0 2px 5px rgba(47, 36, 31, 0.06);
+  --shadow-md: 0 4px 14px rgba(47, 36, 31, 0.08);
+  --shadow-lg: 0 12px 28px -4px rgba(47, 36, 31, 0.12), 0 4px 8px -2px rgba(47, 36, 31, 0.05);
+  --shadow-xl: 0 22px 40px -6px rgba(47, 36, 31, 0.15), 0 8px 12px -5px rgba(47, 36, 31, 0.06);
+  --shadow-card-hover: 0 14px 32px -4px rgba(47, 36, 31, 0.14);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout */
+  --max-width-content: 1280px;
+  --max-width-marketplace: 1480px;
+  --header-height: 68px;
+  --bottom-nav-height: 64px;
+}

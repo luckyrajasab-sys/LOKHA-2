@@ -1,0 +1,926 @@
+/* =========================================
+   LOKHA Brand Logo & Tagline Component
+   ========================================= */
+.lokha-brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-decoration: none;
+  user-select: none;
+}
+
+.lokha-logo-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.lokha-brand-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--lokha-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lokha-bg);
+  box-shadow: 0 2px 8px rgba(47, 36, 31, 0.25);
+  transition: transform var(--transition-fast);
+}
+
+.lokha-brand:hover .lokha-brand-icon {
+  transform: translateY(-1px);
+  background: var(--lokha-accent);
+}
+
+.lokha-brand-name {
+  font-family: var(--font-heading);
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  color: var(--lokha-primary-charcoal);
+  line-height: 1;
+}
+
+.lokha-brand-tagline {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--lokha-muted);
+  letter-spacing: 0.01em;
+  margin-top: 3px;
+  margin-left: 2px;
+}
+
+/* Light / Inverted variation (for dark espresso footer or dark sections) */
+.lokha-brand.is-inverted .lokha-brand-name {
+  color: var(--wood-ivory);
+}
+
+.lokha-brand.is-inverted .lokha-brand-tagline {
+  color: var(--header-sand);
+}
+
+/* =========================================
+   LOKHA Architectural Wooden Button System
+   Crafted with refined walnut, natural oak & soft brass accents
+   ========================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.65rem 1.35rem;
+  min-height: var(--btn-height-desktop, 44px);
+  font-family: var(--font-heading);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  border-radius: var(--btn-radius, 11px);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  transition: 
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 200ms ease,
+    background-image 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Ensure icons inside buttons inherit text color */
+.btn svg {
+  color: currentColor;
+  stroke: currentColor;
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   1. PRIMARY WOOD BUTTONS
+   (Deep Walnut #4A3024 + Ivory Text #F7F1E7 + Subtle Wood Grain)
+   Used for: Search, List Property, Explore Homes, Contact Owner, Schedule Visit, etc.
+   ───────────────────────────────────────────────────────────── */
+.btn-primary,
+.btn-cta-teal,
+.btn-primary-navy,
+.btn-trust-blue {
+  background-color: var(--wood-walnut-deep);
+  background-image: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, 0.16) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 5px),
+    linear-gradient(135deg, #4A3024 0%, #4E3427 35%, #462D21 70%, #3D261C 100%);
+  color: var(--wood-ivory);
+  border: 1px solid rgba(184, 149, 90, 0.28); /* Soft brass micro-accent */
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.16), /* Subtle top inner highlight */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),       /* Bottom inner shadow */
+    var(--btn-shadow-primary);
+}
+
+.btn-primary:hover,
+.btn-cta-teal:hover,
+.btn-primary-navy:hover,
+.btn-trust-blue:hover {
+  background-color: var(--wood-walnut-hover);
+  background-image: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.1) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 5px),
+    linear-gradient(135deg, #5A3B2D 0%, #604031 35%, #56392B 70%, #4C3124 100%);
+  border-color: rgba(184, 149, 90, 0.55);   /* Warm brass accent glow */
+  color: #FFFFFF;
+  transform: translateY(-1.5px);
+  box-shadow: 
+    inset 0 1px 0 rgba(212, 184, 134, 0.45), /* Gentle brass inner highlight */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    var(--btn-shadow-hover);
+}
+
+.btn-primary:active,
+.btn-cta-teal:active,
+.btn-primary-navy:active,
+.btn-trust-blue:active {
+  background-color: var(--wood-walnut-dark);
+  background-image: 
+    linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, transparent 60%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 1px, transparent 1px, transparent 5px),
+    linear-gradient(135deg, #35231B 0%, #3B271F 50%, #2F1E17 100%);
+  border-color: rgba(184, 149, 90, 0.3);
+  transform: translateY(1px);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.35),
+    var(--btn-shadow-active);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2. SECONDARY BUTTONS (Architectural Natural Wood Panel)
+   (Warm Ivory Background #F7F1E7 + Walnut Border + Walnut Text)
+   ───────────────────────────────────────────────────────────── */
+.btn-secondary {
+  background-color: var(--wood-ivory);
+  background-image: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(247, 241, 231, 0.95) 100%),
+    repeating-linear-gradient(90deg, rgba(138, 99, 70, 0.02) 0px, rgba(138, 99, 70, 0.02) 1px, transparent 1px, transparent 6px);
+  border: 1px solid var(--wood-natural);
+  color: var(--wood-walnut-deep);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 2px 8px rgba(74, 48, 36, 0.08);
+}
+
+.btn-secondary:hover {
+  background-color: #FAF5EE;
+  background-image: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 241, 231, 1) 100%),
+    repeating-linear-gradient(90deg, rgba(138, 99, 70, 0.035) 0px, rgba(138, 99, 70, 0.035) 1px, transparent 1px, transparent 6px);
+  border-color: var(--wood-walnut-deep);
+  color: var(--wood-walnut-dark);
+  transform: translateY(-1.5px);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 5px 16px rgba(74, 48, 36, 0.14);
+}
+
+.btn-secondary:active {
+  transform: translateY(1px);
+  box-shadow: 
+    inset 0 1px 3px rgba(74, 48, 36, 0.14),
+    0 1px 4px rgba(74, 48, 36, 0.08);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3. OUTLINE BUTTONS
+   (Transparent / Ivory surface + Walnut 1px Border -> Walnut Hover)
+   ───────────────────────────────────────────────────────────── */
+.btn-outline,
+.btn-outline-navy {
+  background-color: transparent;
+  border: 1px solid var(--wood-natural);
+  color: var(--wood-walnut-deep);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.btn-outline:hover,
+.btn-outline-navy:hover {
+  background-color: var(--wood-walnut-deep);
+  background-image: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.16) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 5px);
+  border-color: rgba(184, 149, 90, 0.45);
+  color: var(--wood-ivory);
+  transform: translateY(-1.5px);
+  box-shadow: 
+    inset 0 1px 0 rgba(212, 184, 134, 0.35),
+    0 6px 18px rgba(53, 35, 27, 0.28);
+}
+
+.btn-outline:active,
+.btn-outline-navy:active {
+  transform: translateY(1px);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.32),
+    0 2px 5px rgba(53, 35, 27, 0.2);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. GHOST BUTTONS
+   (Subtle interactive control that reveals a soft warm wood/cream panel on hover)
+   ───────────────────────────────────────────────────────────── */
+.btn-ghost {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: var(--wood-walnut-deep);
+}
+
+.btn-ghost:hover {
+  background-color: var(--lokha-surface-warm);
+  border-color: rgba(138, 99, 70, 0.22);
+  color: var(--wood-walnut-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(74, 48, 36, 0.06);
+}
+
+.btn-ghost:active {
+  transform: translateY(0.5px);
+  background-color: var(--lokha-beige);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. ICON BUTTONS (Architectural Wood Control)
+   ───────────────────────────────────────────────────────────── */
+.btn-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0;
+  border-radius: var(--btn-radius, 11px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--wood-ivory);
+  border: 1px solid var(--wood-natural);
+  color: var(--wood-walnut-deep);
+  box-shadow: 0 2px 8px rgba(74, 48, 36, 0.08);
+}
+
+.btn-icon:hover {
+  background-color: var(--wood-walnut-deep);
+  color: var(--wood-ivory);
+  border-color: rgba(184, 149, 90, 0.45);
+  transform: translateY(-1.5px);
+  box-shadow: 0 5px 15px rgba(53, 35, 27, 0.24);
+}
+
+.btn-icon:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 4px rgba(53, 35, 27, 0.2);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. DESTRUCTIVE / DANGER BUTTONS
+   (Warm Terracotta / Mahogany Wood Tone)
+   ───────────────────────────────────────────────────────────── */
+.btn-destructive,
+.btn-danger {
+  background-color: var(--wood-terracotta);
+  background-image: 
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0.15) 100%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 5px);
+  border: 1px solid rgba(158, 71, 51, 0.65);
+  color: #FFFFFF;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 4px 14px rgba(158, 71, 51, 0.26);
+}
+
+.btn-destructive:hover,
+.btn-danger:hover {
+  background-color: #A94E38;
+  color: #FFFFFF;
+  border-color: rgba(158, 71, 51, 0.85);
+  transform: translateY(-1.5px);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 6px 18px rgba(158, 71, 51, 0.34);
+}
+
+.btn-destructive:active,
+.btn-danger:active {
+  transform: translateY(1px);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.35),
+    0 2px 5px rgba(158, 71, 51, 0.2);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. DISABLED BUTTONS
+   (Muted beige/taupe surface, low-contrast walnut text, no texture)
+   ───────────────────────────────────────────────────────────── */
+.btn:disabled,
+.btn[disabled],
+.btn.is-disabled {
+  background-color: var(--wood-disabled-bg) !important;
+  background-image: none !important;
+  border-color: var(--wood-disabled-border) !important;
+  color: var(--wood-disabled-text) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  opacity: 0.75;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   8. LOADING BUTTONS
+   (Subtle brass spinner animation with dimensions intact)
+   ───────────────────────────────────────────────────────────── */
+.btn.is-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.btn.is-loading svg {
+  visibility: hidden;
+}
+
+.btn.is-loading::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 50%;
+  left: 50%;
+  margin: -9px 0 0 -9px;
+  border: 2px solid rgba(247, 241, 231, 0.35);
+  border-top-color: var(--wood-brass-light);
+  border-radius: 50%;
+  animation: btn-wood-spin 0.75s linear infinite;
+}
+
+@keyframes btn-wood-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Sizing Modifiers */
+.btn-sm {
+  min-height: 36px;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.825rem;
+  border-radius: 9px;
+}
+
+.btn-lg {
+  min-height: 48px;
+  padding: 0.85rem 1.85rem;
+  font-size: 1.02rem;
+  border-radius: 12px;
+}
+
+/* Mobile Touch Optimization */
+@media (max-width: 640px) {
+  .btn {
+    min-height: var(--btn-height-mobile, 48px);
+    padding: 0.75rem 1.25rem;
+  }
+  .btn-sm {
+    min-height: 40px;
+    padding: 0.45rem 1rem;
+  }
+}
+
+/* Save Heart Button */
+.btn-save-heart {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(4px);
+  color: var(--lokha-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(47, 36, 31, 0.12);
+  transition: all var(--transition-fast);
+}
+
+.btn-save-heart:hover {
+  transform: scale(1.1);
+  color: var(--lokha-terracotta);
+  background: #FFFFFF;
+}
+
+.btn-save-heart.is-saved {
+  color: var(--lokha-terracotta);
+  background: #FFFFFF;
+}
+
+.btn-save-heart.is-saved svg {
+  fill: var(--lokha-terracotta);
+}
+
+/* =========================================
+   Badges
+   ========================================= */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.25rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  line-height: 1.2;
+}
+
+.badge-verified {
+  background-color: var(--color-verified-bg);
+  color: var(--color-verified-text);
+  border: 1px solid var(--color-verified-border);
+}
+
+.badge-featured {
+  background-color: var(--lokha-surface-warm);
+  color: var(--lokha-wood-dark);
+  border: 1px solid var(--lokha-beige);
+}
+
+.badge-new {
+  background-color: var(--color-teal-tint);
+  color: var(--lokha-accent-dark);
+  border: 1px solid #B6EBE6;
+}
+
+.badge-status-ready {
+  background-color: #E8F0EF;
+  color: var(--lokha-accent-dark);
+  border: 1px solid #C8DDD9;
+}
+
+.badge-status-under-construction {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-text);
+  border: 1px solid #EEDFBE;
+}
+
+.badge-price-drop {
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+  border: 1px solid #F2D2C8;
+}
+
+/* =========================================
+   Navbar (Sticky Desktop & Tablet)
+   ========================================= */
+.site-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: rgba(247, 243, 237, 0.94);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--lokha-border);
+  box-shadow: 0 1px 4px rgba(47, 36, 31, 0.05);
+}
+
+.site-navbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+}
+
+.navbar-nav {
+  display: none;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+@media (min-width: 960px) {
+  .navbar-nav {
+    display: flex;
+  }
+}
+
+.navbar-link {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--lokha-primary-charcoal);
+  padding: 0.5rem 0.25rem;
+  position: relative;
+  transition: color var(--transition-fast);
+}
+
+.navbar-link:hover {
+  color: var(--lokha-accent);
+}
+
+.navbar-link.active {
+  color: var(--lokha-primary);
+}
+
+.navbar-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2.5px;
+  background-color: var(--lokha-accent);
+  border-radius: var(--radius-full);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.navbar-saved-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--lokha-primary-charcoal);
+  border-radius: var(--radius-md);
+  position: relative;
+  transition: background-color var(--transition-fast);
+}
+
+.navbar-saved-btn:hover {
+  background-color: var(--lokha-surface-warm);
+}
+
+.saved-count-bubble {
+  min-width: 19px;
+  height: 19px;
+  border-radius: var(--radius-full);
+  background-color: var(--lokha-terracotta);
+  color: #FFFFFF;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+/* =========================================
+   Bottom Navigation (Mobile)
+   ========================================= */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--bottom-nav-height);
+  background: rgba(247, 243, 237, 0.96);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--lokha-border);
+  box-shadow: 0 -4px 14px rgba(47, 36, 31, 0.08);
+  z-index: 1050;
+  padding: 0 var(--space-2);
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  body {
+    padding-bottom: var(--bottom-nav-height);
+  }
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  height: 100%;
+  color: var(--lokha-muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  position: relative;
+  text-decoration: none;
+}
+
+.bottom-nav-item.active {
+  color: var(--lokha-primary);
+  font-weight: 700;
+}
+
+.bottom-nav-item.active svg {
+  stroke: var(--lokha-accent);
+}
+
+.bottom-nav-badge {
+  position: absolute;
+  top: 6px;
+  right: 28%;
+  background: var(--lokha-terracotta);
+  color: white;
+  font-size: 0.65rem;
+  border-radius: 999px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* =========================================
+   Footer (Dark Espresso #211A17)
+   ========================================= */
+.site-footer {
+  background-color: var(--lokha-primary-dark);
+  color: var(--lokha-bg);
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-8);
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-8);
+  padding-bottom: var(--space-10);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-brand-col {
+  grid-column: span 1;
+}
+
+@media (min-width: 992px) {
+  .footer-brand-col {
+    grid-column: span 2;
+  }
+}
+
+.footer-desc {
+  color: var(--lokha-border);
+  font-size: 0.9rem;
+  margin-top: var(--space-4);
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+.footer-heading {
+  color: var(--lokha-bg);
+  font-size: 0.98rem;
+  font-weight: 700;
+  margin-bottom: var(--space-4);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.footer-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.footer-link {
+  color: var(--lokha-border);
+  font-size: 0.88rem;
+  transition: color var(--transition-fast);
+}
+
+.footer-link:hover {
+  color: var(--lokha-gold);
+}
+
+.footer-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-6);
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 768px) {
+  .footer-bottom {
+    flex-direction: row;
+  }
+}
+
+.footer-copy {
+  color: var(--lokha-muted);
+  font-size: 0.82rem;
+}
+
+.footer-socials {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.social-link {
+  color: var(--lokha-border);
+  transition: color var(--transition-fast);
+}
+
+.social-link:hover {
+  color: var(--lokha-gold);
+}
+
+/* =========================================
+   Toast Notifications
+   ========================================= */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .toast-container {
+    bottom: 80px;
+    left: 16px;
+    right: 16px;
+    align-items: center;
+  }
+}
+
+.toast-item {
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 400px;
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.15rem;
+  box-shadow: 0 10px 25px rgba(47, 36, 31, 0.15);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 0.88rem;
+  font-weight: 500;
+  border: 1px solid var(--lokha-beige);
+  border-left: 4px solid var(--lokha-accent);
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-item.info {
+  border-left-color: var(--lokha-wood);
+}
+
+.toast-item.error {
+  border-left-color: var(--lokha-terracotta);
+}
+
+.toast-item.success {
+  border-left-color: var(--lokha-accent);
+}
+
+.toast-item.heart {
+  border-left-color: var(--lokha-terracotta);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* =========================================
+   Modal Dialogs
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(33, 26, 23, 0.72);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  z-index: 1500;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px rgba(47, 36, 31, 0.25);
+  border: 1px solid var(--lokha-beige);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--lokha-beige);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-body {
+  padding: var(--space-6);
+}
+
+.modal-footer {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--lokha-beige);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  background: var(--lokha-surface-warm);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* =========================================
+   Skeleton Loaders
+   ========================================= */
+.skeleton {
+  background: linear-gradient(90deg, #EFE8DE 25%, #F7F3ED 50%, #EFE8DE 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* =========================================
+   Empty State
+   ========================================= */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  background: #FFFFFF;
+  border-radius: var(--radius-xl);
+  border: 1px dashed var(--lokha-border);
+  margin: var(--space-6) 0;
+}
+
+.empty-state-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: var(--radius-full);
+  background: var(--lokha-surface-warm);
+  color: var(--lokha-wood-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}
+
+.empty-state-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  color: var(--lokha-primary);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-desc {
+  max-width: 440px;
+  color: var(--lokha-muted);
+  font-size: 0.95rem;
+  margin-bottom: var(--space-6);
+}

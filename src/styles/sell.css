@@ -1,0 +1,277 @@
+/* =========================================
+   Sell / List Property Multi-step Form
+   ========================================= */
+.sell-page-wrapper {
+  padding: var(--space-8) 0 var(--space-16) 0;
+}
+
+.sell-container {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* Stepper Bar */
+.form-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+  position: relative;
+}
+
+.form-stepper::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 2px;
+  background: var(--color-border);
+  z-index: 1;
+}
+
+.stepper-step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-bg-page);
+  padding: 0 var(--space-2);
+}
+
+.step-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  background: #FFFFFF;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.stepper-step.active .step-circle {
+  background: var(--lokha-primary);
+  border-color: var(--lokha-primary);
+  color: #FFFFFF;
+  box-shadow: 0 0 0 4px var(--lokha-surface-warm);
+}
+
+.stepper-step.completed .step-circle {
+  background: var(--lokha-accent);
+  border-color: var(--lokha-accent);
+  color: #FFFFFF;
+}
+
+.step-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--lokha-muted);
+  text-align: center;
+}
+
+.stepper-step.active .step-label {
+  color: var(--lokha-primary);
+  font-weight: 700;
+}
+
+/* Form Card */
+.form-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--lokha-border);
+  padding: var(--space-8);
+  box-shadow: 0 4px 16px rgba(47, 36, 31, 0.06);
+}
+
+.form-step-title {
+  font-family: var(--font-serif);
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--lokha-primary);
+  margin-bottom: var(--space-2);
+}
+
+.form-step-subtitle {
+  color: var(--lokha-muted);
+  font-size: 0.92rem;
+  margin-bottom: var(--space-6);
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.form-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg-page);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  transition: all var(--transition-fast);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  background: #FFFFFF;
+  border-color: var(--lokha-accent);
+  box-shadow: 0 0 0 3px rgba(63, 119, 112, 0.15);
+}
+
+.form-field-error {
+  font-size: 0.78rem;
+  color: var(--lokha-terracotta);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+/* Radio Cards / Purpose Toggles */
+.radio-cards-row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.radio-card {
+  flex: 1;
+  border: 1.5px solid var(--lokha-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--lokha-primary-charcoal);
+  transition: all var(--transition-fast);
+}
+
+.radio-card:hover {
+  border-color: var(--lokha-accent);
+  background: var(--lokha-surface-warm);
+}
+
+.radio-card.active {
+  border-color: var(--lokha-accent);
+  background: var(--lokha-surface-warm);
+  color: var(--lokha-primary);
+  font-weight: 700;
+}
+
+/* Drag & Drop Photo Uploader */
+.dropzone-container {
+  border: 2px dashed var(--lokha-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  text-align: center;
+  background: var(--lokha-bg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-bottom: var(--space-6);
+}
+
+.dropzone-container:hover {
+  border-color: var(--lokha-accent);
+  background: var(--lokha-surface-warm);
+}
+
+.dropzone-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  background: #FFFFFF;
+  color: var(--color-cta-teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-3) auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.upload-thumbnails-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.upload-thumbnail-card {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.upload-thumbnail-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumb-actions {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 4px;
+}
+
+.thumb-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.65);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+/* Step Navigation Footer */
+.stepper-nav-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-8);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-subtle);
+}
