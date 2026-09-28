@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Properties collection
+    match /properties/{propertyId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Products collection
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Default match
+    match /{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
